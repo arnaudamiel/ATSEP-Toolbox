@@ -1,0 +1,22 @@
+{
+    "name": "ATSEP Toolbox",
+    "short_name": "ATSEP",
+    "start_url": "./ATSEP.html",
+    "display": "standalone",
+    "background_color": "#1a202c",
+    "theme_color": "#1a202c",
+    "description": "Toolbox for ATC engineers.",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "orientation": "portrait"
+}
