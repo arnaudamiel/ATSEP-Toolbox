@@ -2,7 +2,9 @@
 
 # ATSEP Toolbox
 
-**ATSEP Toolbox** is a comprehensive Progressive Web App (PWA) designed for ATC Engineers and aviation professionals. It combines QNH correction with high-accuracy geodesic tools.
+**ATSEP Toolbox** is a comprehensive Progressive Web App (PWA) designed for ATC Engineers and aviation enthusiasts and professionals.
+
+All tools are available to run offline once the toolbox has been installed on your device.
 
 ## Features
 
@@ -13,9 +15,9 @@
 
 ### 2. Geodesic Tools (High Accuracy)
 
-Use **Vincenty's Algorithms** on the WGS-84 ellipsoid, providing distance and bearing accuracy to within a few millimeters (vs ~0.5% error in spherical models).
+Use **Vincenty's Algorithms** on the WGS-84 ellipsoid, providing distance and bearing accuracy to within a few millimeters.
 
-* **Range (Inverse):** Calculate the distance and initial bearing between two points.
+* **Range (Inverse):** Calculate the range and bearing between two points.
 * **Destination (Direct):** Project a new point given a starting point, distance, and bearing.
 * **Linked Units:** Seamlessly switch between Nautical Miles (NM) and Meters (M) across tabs.
 * **Flexible Formatting:** Support for Decimal Degrees (DD), Degrees Decimal Minutes (DDM), and DMS.
@@ -29,7 +31,7 @@ The application is a **Progressive Web App (PWA)**.
 
 ---
 
-Currently available at: <https://arnaudamiel.github.io/ATSEP-Toolbox/ATSEP.html>
+Currently available at: <https://arnaudamiel.github.io/ATSEP-Toolbox>
 
 ---
 
