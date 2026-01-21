@@ -182,6 +182,15 @@ body {
     font-size: 1.1rem;
 }
 
+/* Swap Button */
+.swap-container {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 10;
+    width: 100%;
+}
+
 .swap-icon-btn {
     background: none;
     border: none;
@@ -355,4 +364,22 @@ body {
 
 .text-left {
     text-align: left;
+}
+
+/* Responsiveness helpers */
+.input-row-responsive {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.input-row-responsive > div {
+    min-width: 140px; /* Ensure inputs don't get too squashed before wrapping */
+}
+
+/* Result Formatting */
+.coord-val {
+    display: inline-block;
+    white-space: nowrap;
+    margin: 0 0.5rem;
 }

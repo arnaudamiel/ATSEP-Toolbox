@@ -513,7 +513,8 @@ const UI = (function () {
             return `${hemi} ${deg}° ${min}' ${sec}"`;
         };
 
-        return `${formatSingle(lat, true)}  ${formatSingle(lon, false)}`;
+        // Return HTML with wrappers to control line breaking
+        return `<span class="coord-val">${formatSingle(lat, true)}</span><span class="coord-val">${formatSingle(lon, false)}</span>`;
     }
 
     // --- Logic: Vicenty Calculation ---
