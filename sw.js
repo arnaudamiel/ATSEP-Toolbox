@@ -1,7 +1,12 @@
-const CACHE_NAME = 'atsep-calc-v5';
+const CACHE_NAME = 'atsep-calc-v6';
 const ASSETS_TO_CACHE = [
     './',
     './ATSEP.html',
+    './style.css',
+    './Vicenty.js',
+    './QNH.js',
+    './ui.js',
+    './app.js',
     './icon-192.png',
     './icon-512.png'
 ];
