@@ -13,6 +13,14 @@ const UI = (function () {
         DEST_UNIT: 'd_unit'
     };
 
+    const INHG_TO_HPA = 33.86389; // Standard conversion factor
+
+    const CONVERSION_FACTORS = {
+        INHG_TO_HPA: INHG_TO_HPA,
+        HPA_TO_INHG: 1 / INHG_TO_HPA,
+        METERS_PER_NM: 1852
+    };
+
     /**
      * Initialize the UI Controller
      */
@@ -402,11 +410,11 @@ const UI = (function () {
             if (!isNaN(val)) {
                 if (newUnit === 'inHg' && oldUnit === 'hPa') {
                     // hPa -> inHg
-                    val = val * 0.02953;
+                    val = val * CONVERSION_FACTORS.HPA_TO_INHG;
                     input.value = val.toFixed(2);
                 } else if (newUnit === 'hPa' && oldUnit === 'inHg') {
                     // inHg -> hPa
-                    val = val * 33.8639;
+                    val = val * CONVERSION_FACTORS.INHG_TO_HPA;
                     input.value = Math.round(val);
                 }
             }
@@ -530,7 +538,7 @@ const UI = (function () {
             const unit = document.getElementById('range_unit_type').value;
 
             let distDisplay = res.distance;
-            if (unit === 'NM') distDisplay = res.distance / 1852;
+            if (unit === 'NM') distDisplay = res.distance / CONVERSION_FACTORS.METERS_PER_NM;
 
             const html = `
                 <div class="result-row"><span class="label">Range:</span> <span class="val">${distDisplay.toFixed(2)} ${unit}</span></div>
@@ -568,7 +576,7 @@ const UI = (function () {
         }
 
         const unit = document.getElementById('d_unit').value;
-        const distMeters = (unit === 'NM') ? dist * 1852 : dist;
+        const distMeters = (unit === 'NM') ? dist * CONVERSION_FACTORS.METERS_PER_NM : dist;
 
         try {
             const dest = Vicenty.calculateDestination(start.lat, start.lon, distMeters, brng);

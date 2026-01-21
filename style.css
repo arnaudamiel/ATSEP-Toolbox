@@ -219,7 +219,7 @@ body {
     padding: 1.5rem;
     border-radius: 0.8rem;
     text-align: center;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-family: ui-monospace, monospace;
     font-weight: 700;
     font-size: 1.1rem;
     border: 1px solid var(--color-blue-500);
@@ -373,8 +373,9 @@ body {
     flex-wrap: wrap;
 }
 
-.input-row-responsive > div {
-    min-width: 140px; /* Ensure inputs don't get too squashed before wrapping */
+.input-row-responsive>div {
+    min-width: 140px;
+    /* Ensure inputs don't get too squashed before wrapping */
 }
 
 /* Result Formatting */

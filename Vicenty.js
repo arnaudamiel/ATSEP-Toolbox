@@ -12,6 +12,26 @@ const Vicenty = (function () {
     const WGS84_b = 6356752.314245;     // Minor axis (meters)
     const WGS84_f = 1 / 298.257223563;  // Flattening
 
+    /**
+     * Vincenty's expansion coefficients (Helmert's series).
+     * These are numerators of the Taylor series expansion for the geodesic distance, 
+     * scaled to power-of-two denominators (2^14 and 2^10) to maintain integer 
+     * accuracy in the original 1975 derivation.
+     */
+    const A_DENOM = 16384;
+    const A_C1 = 4096;
+    const A_C2 = -768;
+    const A_C3 = 320;
+    const A_C4 = -175;
+
+    const B_DENOM = 1024;
+    const B_C1 = 256;
+    const B_C2 = -128;
+    const B_C3 = 74;
+    const B_C4 = -47;
+
+    const CONVERGENCE_THRESHOLD = 1e-12;
+
     const toRad = d => d * Math.PI / 180;
     const toDeg = r => r * 180 / Math.PI;
 
@@ -41,22 +61,23 @@ const Vicenty = (function () {
         const cosSqAlpha = 1 - sinAlpha * sinAlpha;
         const uSq = cosSqAlpha * (WGS84_a * WGS84_a - WGS84_b * WGS84_b) / (WGS84_b * WGS84_b);
 
-        const A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
-        const B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+        // Vincenty's expansion coefficients for A and B
+        const A_coeff = 1 + uSq / A_DENOM * (A_C1 + uSq * (A_C2 + uSq * (A_C3 + A_C4 * uSq)));
+        const B_coeff = uSq / B_DENOM * (B_C1 + uSq * (B_C2 + uSq * (B_C3 + B_C4 * uSq)));
 
-        let sigma = s / (WGS84_b * A);
+        let sigma = s / (WGS84_b * A_coeff);
         let sigmaP = 2 * Math.PI;
         let sinSigma, cosSigma, cos2SigmaM, deltaSigma;
 
         let iterLimit = 100;
-        while (Math.abs(sigma - sigmaP) > 1e-12 && --iterLimit > 0) {
+        while (Math.abs(sigma - sigmaP) > CONVERGENCE_THRESHOLD && --iterLimit > 0) {
             cos2SigmaM = Math.cos(2 * sigma1 + sigma);
             sinSigma = Math.sin(sigma);
             cosSigma = Math.cos(sigma);
-            deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
-                B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+            deltaSigma = B_coeff * sinSigma * (cos2SigmaM + B_coeff / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
+                B_coeff / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
             sigmaP = sigma;
-            sigma = s / (WGS84_b * A) + deltaSigma;
+            sigma = s / (WGS84_b * A_coeff) + deltaSigma;
         }
 
         if (iterLimit === 0) {
@@ -136,19 +157,19 @@ const Vicenty = (function () {
             lambda = L + (1 - C) * WGS84_f * sinAlpha *
                 (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
 
-        } while (Math.abs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
+        } while (Math.abs(lambda - lambdaP) > CONVERGENCE_THRESHOLD && --iterLimit > 0);
 
         if (iterLimit === 0) {
             throw new Error("Antipodal Limit reached (Points are nearly opposite)");
         }
 
         const uSq = cosSqAlpha * (WGS84_a * WGS84_a - WGS84_b * WGS84_b) / (WGS84_b * WGS84_b);
-        const A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
-        const B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
-        const deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
-            B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+        const A_coeff = 1 + uSq / A_DENOM * (A_C1 + uSq * (A_C2 + uSq * (A_C3 + A_C4 * uSq)));
+        const B_coeff = uSq / B_DENOM * (B_C1 + uSq * (B_C2 + uSq * (B_C3 + B_C4 * uSq)));
+        const deltaSigma = B_coeff * sinSigma * (cos2SigmaM + B_coeff / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
+            B_coeff / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
 
-        const s = WGS84_b * A * (sigma - deltaSigma);
+        const s = WGS84_b * A_coeff * (sigma - deltaSigma);
 
         const fwdAz = Math.atan2(cosU2 * sinLambda, cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
         const initialBearing = (toDeg(fwdAz) + 360) % 360;
