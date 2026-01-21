@@ -36,7 +36,7 @@
                     (QNH)</label>
                 <div class="flex items-center space-x-2">
                     <input type="number" id="pressureInput" class="input-field flex-grow save-val"
-                        placeholder="e.g., 1005" inputmode="decimal" aria-label="Pressure value" required>
+                        placeholder="e.g., 1005" inputmode="decimal" aria-label="Pressure value" required min="0">
                     <select id="pressureUnit" class="input-field w-auto text-sm save-val"
                         aria-label="Select pressure unit">
                         <option value="hPa">hPa</option>
@@ -80,7 +80,15 @@
                 </div>
             </div>
 
-            <div id="r_origin_inputs" class="input-group"></div>
+            <div id="r_origin_inputs" class="input-group" style="margin-bottom: 0.5rem;"></div>
+
+            <div style="text-align: center; margin-bottom: 0.5rem;">
+                <button id="swapRangeBtn" class="swap-icon-btn" type="button" title="Swap Origin and Destination"
+                    aria-label="Swap coordinates">
+                    ⇅
+                </button>
+            </div>
+
             <div id="r_dest_inputs" class="input-group"></div>
 
             <button class="calculate-btn">Calculate Vectors</button>
@@ -116,11 +124,13 @@
                 <div style="display: flex; gap: 0.8rem;">
                     <div style="flex:1">
                         <small style="display:block; margin-bottom:4px; opacity:0.7;">Range</small>
-                        <input type="number" id="d_dist" class="num-input save-val" placeholder="0.0">
+                        <input type="number" id="d_dist" class="num-input w-full save-val" placeholder="0.0"
+                            inputmode="decimal" min="0" step="any">
                     </div>
                     <div style="flex:1">
                         <small style="display:block; margin-bottom:4px; opacity:0.7;">Bearing (°T)</small>
-                        <input type="number" id="d_brng" class="num-input save-val" placeholder="360">
+                        <input type="number" id="d_brng" class="num-input w-full save-val" placeholder="360"
+                            inputmode="decimal" min="0" max="360" step="any">
                     </div>
                 </div>
             </div>

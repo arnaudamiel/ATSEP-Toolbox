@@ -51,21 +51,26 @@ const QNH = (function () {
         // Barometric formula
         let correctionInFeet = ((pressureInHPa / STANDARD_PRESSURE_HPA) ** (Rs * L / g) - 1) * (T0 / L / FEET_TO_METERS);
         let finalCorrection;
+        let finalPA; // Pressure Altitude
         let finalUnit;
 
         if (outputUnit === 'FL') {
             finalCorrection = Math.round(correctionInFeet / 100);
+            finalPA = Math.round((-correctionInFeet) / 100);
             finalUnit = 'FL';
         } else if (outputUnit === 'feet') {
             finalCorrection = Math.round(correctionInFeet);
+            finalPA = Math.round(-correctionInFeet);
             finalUnit = 'ft';
         } else if (outputUnit === 'meters') {
             finalCorrection = Math.round(correctionInFeet * FEET_TO_METERS);
+            finalPA = Math.round(-correctionInFeet * FEET_TO_METERS);
             finalUnit = 'm';
         }
 
         return {
             correction: finalCorrection,
+            pressureAltitude: finalPA,
             unit: finalUnit,
             warning: warning,
             error: false

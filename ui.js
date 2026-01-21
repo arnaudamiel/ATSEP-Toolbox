@@ -73,10 +73,18 @@ const UI = (function () {
             if (el) el.addEventListener('change', (e) => _updateDistUnit(e.target.value));
         });
 
-        // Input Savings (Auto-save)
+        // Swap Button
+        const swapBtn = document.getElementById('swapRangeBtn');
+        if (swapBtn) swapBtn.addEventListener('click', _swapRangeInputs);
+
+        // Input Savings (Auto-save) for non-coordinate inputs
         document.addEventListener('input', (e) => {
             if (e.target.classList.contains('save-val') && e.target.id) {
-                localStorage.setItem(e.target.id, e.target.value);
+                const el = e.target;
+                if (el.saveTimeout) clearTimeout(el.saveTimeout);
+                el.saveTimeout = setTimeout(() => {
+                    localStorage.setItem(el.id, el.value);
+                }, 300);
             }
         });
 
@@ -96,7 +104,8 @@ const UI = (function () {
 
         const pressureUnit = document.getElementById('pressureUnit');
         if (pressureUnit) {
-            pressureUnit.addEventListener('change', _updatePressureInputAttributes);
+            pressureUnit.dataset.prev = pressureUnit.value;
+            pressureUnit.addEventListener('change', _handlePressureUnitChange);
             _updatePressureInputAttributes(); // Run once on init
         }
 
@@ -147,6 +156,7 @@ const UI = (function () {
             const saved = localStorage.getItem(el.id);
             if (saved !== null) el.value = saved;
         });
+        // Coords are handled separately now
     }
 
     function _updateFmt(val) {
@@ -155,21 +165,9 @@ const UI = (function () {
             el.value = val;
         });
 
-        // Clear hidden inputs to avoid ghost data
-        const inputsToClear = ['_m', '_s'];
-        const prefixes = ['r_origin_lat', 'r_origin_lon', 'r_dest_lat', 'r_dest_lon', 'd_start_lat', 'd_start_lon'];
-
-        prefixes.forEach(p => {
-            if (val === 'DD') {
-                inputsToClear.forEach(sfx => localStorage.setItem(p + sfx, '0'));
-            } else if (val === 'DDM') {
-                localStorage.setItem(p + '_s', '0');
-            }
-        });
-
         localStorage.setItem(STORAGE_KEYS.COORD_FMT, val);
-        localStorage.setItem('range_fmt_sel', val); // Legacy support if needed
-        localStorage.setItem('dest_fmt_sel', val);  // Legacy support if needed
+        localStorage.setItem('range_fmt_sel', val);
+        localStorage.setItem('dest_fmt_sel', val);
 
         _updateDependentUI();
     }
@@ -189,32 +187,56 @@ const UI = (function () {
             if (container) {
                 container.innerHTML = _createCoordRow(prefix, 'lat') + _createCoordRow(prefix, 'lon');
             }
+            // Load values from DD storage
+            _loadCoordsFromStorage(prefix, 'lat');
+            _loadCoordsFromStorage(prefix, 'lon');
         });
-        // Restore values for newly created inputs
+
+        // Attach listeners to the newly created inputs
+        _attachCoordListeners();
+
+        // Restore other inputs
         _inputRestoration();
     }
 
     function _createCoordRow(prefix, type) {
         const fmt = document.getElementById('coord_fmt').value || 'DD';
-        let html = `<div class="coord-row">`;
+        let html = `<div class="coord-row" data-prefix="${prefix}" data-type="${type}">`;
 
         // Hemisphere Select
-        html += `<select id="${prefix}_${type}_h" class="hem-select save-val">`;
+        html += `<select class="hem-select coord-input" data-part="h">`;
         if (type === 'lat') html += `<option value="1">N</option><option value="-1">S</option>`;
         else html += `<option value="1">E</option><option value="-1">W</option>`;
         html += `</select>`;
 
+        // Deg / Min / Sec Config
+        const isLat = (type === 'lat');
+        const maxDeg = isLat ? 90 : 180;
+
+        // Helper for input attributes
+        const getAttrs = (part, max, step) => {
+            return `type="number" class="num-input coord-input" data-part="${part}" 
+                    inputmode="decimal" min="0" max="${max}" step="${step}"`;
+        };
+
         // Degrees
-        html += `<input type="number" id="${prefix}_${type}_d" class="num-input save-val" placeholder="°">`;
+        const dStep = (fmt === 'DD') ? "any" : "1";
+        // For DD, max is maxDeg. For DMS/DDM, technically maxDeg too (e.g. 90deg 0min). 
+        // Validation should allow 90 if others are 0, but HTML max=90 works.
+        html += `<input ${getAttrs('d', maxDeg, dStep)} placeholder="°">`;
 
         // Minutes
         if (fmt !== 'DD') {
-            html += `<input type="number" id="${prefix}_${type}_m" class="num-input save-val" placeholder="'">`;
+            const mStep = (fmt === 'DDM') ? "any" : "1";
+            // Minutes max is always < 60 (except if degrees < max? No, standard is 0-59).
+            // Let's use 60 as max for safety, but step suggests integer vs decimal
+            html += `<input ${getAttrs('m', 60, mStep)} placeholder="'">`;
         }
 
         // Seconds
         if (fmt === 'DMS') {
-            html += `<input type="number" id="${prefix}_${type}_s" class="num-input save-val" placeholder="''">`;
+            const sStep = "any";
+            html += `<input ${getAttrs('s', 60, sStep)} placeholder="''">`;
         }
 
         html += `</div>`;
@@ -225,17 +247,174 @@ const UI = (function () {
         const el = document.getElementById(elementId);
         if (el) {
             navigator.clipboard.writeText(el.innerText)
-                .then(() => {
-                    // Optional: Visual feedback
-                    const originalText = el.innerText;
-                    // el.innerText = "Copied!";
-                    // setTimeout(() => el.innerText = originalText, 1000);
-                })
                 .catch(err => console.error('Copy failed', err));
         }
     }
 
+    // --- Logic: Coordinate Management ---
+
+    function _attachCoordListeners() {
+        document.querySelectorAll('.coord-input').forEach(input => {
+            // Avoid double binding
+            if (input.dataset.bound) return;
+            input.dataset.bound = true;
+
+            input.addEventListener('input', _handleCoordInput);
+
+            // Paste handling for degrees
+            if (input.dataset.part === 'd') {
+                input.addEventListener('paste', _handlePaste);
+            }
+        });
+    }
+
+    function _handlePaste(e) {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        if (!text) return;
+
+        const row = e.target.closest('.coord-row');
+        const prefix = row.dataset.prefix; // e.g., r_origin
+        const type = row.dataset.type;     // e.g., lat
+
+        let val = parseFloat(text);
+        if (isNaN(val)) return;
+
+        // If negative, set sign to -1 (S/W) and use abs value
+        if (val < 0) {
+            const hemSelect = row.querySelector('[data-part="h"]');
+            if (hemSelect) hemSelect.value = "-1";
+            val = Math.abs(val);
+        }
+
+        // Set the degree input value
+        e.target.value = val;
+
+        // Trigger save
+        _saveCoordsToStorage(prefix, type);
+    }
+
+    function _handleCoordInput(e) {
+        const row = e.target.closest('.coord-row');
+        if (!row) return;
+        const prefix = row.dataset.prefix;
+        const type = row.dataset.type;
+
+        const el = e.target;
+        if (el.coordTimeout) clearTimeout(el.coordTimeout);
+        el.coordTimeout = setTimeout(() => {
+            _saveCoordsToStorage(prefix, type);
+        }, 300);
+    }
+
+    function _saveCoordsToStorage(prefix, type) {
+        const row = document.querySelector(`.coord-row[data-prefix="${prefix}"][data-type="${type}"]`);
+        if (!row) return;
+
+        const getVal = (part) => {
+            const el = row.querySelector(`[data-part="${part}"]`);
+            return el ? (parseFloat(el.value) || 0) : 0;
+        };
+
+        const h = getVal('h'); // 1 or -1
+        const d = getVal('d');
+        const m = getVal('m');
+        const s = getVal('s');
+
+        const dd = h * (d + m / 60 + s / 3600);
+        localStorage.setItem(`${prefix}_${type}_dd`, dd);
+    }
+
+    function _loadCoordsFromStorage(prefix, type) {
+        const ddVal = parseFloat(localStorage.getItem(`${prefix}_${type}_dd`));
+        if (isNaN(ddVal)) return; // No saved data
+
+        const row = document.querySelector(`.coord-row[data-prefix="${prefix}"][data-type="${type}"]`);
+        if (!row) return;
+
+        const fmt = document.getElementById('coord_fmt').value || 'DD';
+        const absVal = Math.abs(ddVal);
+        const sign = ddVal < 0 ? -1 : 1;
+
+        // Set Hemisphere
+        const hSel = row.querySelector('[data-part="h"]');
+        if (hSel) hSel.value = sign;
+
+        // Calculate parts
+        let d, m = 0, s = 0;
+
+        if (fmt === 'DD') {
+            d = absVal; // Keep high precision? 
+            // Display might limit decimals, but value should be exact
+        } else if (fmt === 'DDM') {
+            d = Math.floor(absVal);
+            m = (absVal - d) * 60;
+        } else { // DMS
+            d = Math.floor(absVal);
+            const mFull = (absVal - d) * 60;
+            m = Math.floor(mFull);
+            s = (mFull - m) * 60;
+        }
+
+        // Set inputs
+        const setVal = (part, val) => {
+            const el = row.querySelector(`[data-part="${part}"]`);
+            // Format to reasonable decimals to avoid floating point ugliness
+            // DD: 6, DDM: 4, DMS: 2
+            let displayVal = val;
+            if (part === 'd' && fmt === 'DD') displayVal = parseFloat(val.toFixed(6));
+            if (part === 'm') displayVal = parseFloat(val.toFixed(4));
+            if (part === 's') displayVal = parseFloat(val.toFixed(2));
+
+            if (el) el.value = displayVal;
+        };
+
+        setVal('d', d);
+        setVal('m', m);
+        setVal('s', s);
+    }
+
+    function _swapRangeInputs() {
+        const p1Lat = localStorage.getItem('r_origin_lat_dd');
+        const p1Lon = localStorage.getItem('r_origin_lon_dd');
+        const p2Lat = localStorage.getItem('r_dest_lat_dd');
+        const p2Lon = localStorage.getItem('r_dest_lon_dd');
+
+        localStorage.setItem('r_origin_lat_dd', p2Lat || 0);
+        localStorage.setItem('r_origin_lon_dd', p2Lon || 0);
+        localStorage.setItem('r_dest_lat_dd', p1Lat || 0);
+        localStorage.setItem('r_dest_lon_dd', p1Lon || 0);
+
+        // Reload UI
+        _updateDependentUI();
+    }
+
     // --- Logic: QNH ---
+
+    function _handlePressureUnitChange(e) {
+        const el = e.target;
+        const newUnit = el.value;
+        const oldUnit = el.dataset.prev;
+        const input = document.getElementById('pressureInput');
+
+        if (input.value && oldUnit && newUnit !== oldUnit) {
+            let val = parseFloat(input.value);
+            if (!isNaN(val)) {
+                if (newUnit === 'inHg' && oldUnit === 'hPa') {
+                    // hPa -> inHg
+                    val = val * 0.02953;
+                    input.value = val.toFixed(2);
+                } else if (newUnit === 'hPa' && oldUnit === 'inHg') {
+                    // inHg -> hPa
+                    val = val * 33.8639;
+                    input.value = Math.round(val);
+                }
+            }
+        }
+
+        el.dataset.prev = newUnit;
+        _updatePressureInputAttributes();
+    }
 
     function _updatePressureInputAttributes() {
         const unit = document.getElementById('pressureUnit').value;
@@ -279,63 +458,41 @@ const UI = (function () {
         const colorClass = res.correction > 0 ? 'result-positive' : (res.correction < 0 ? 'result-negative' : '');
         const prefix = res.correction > 0 ? '+' : '';
 
-        html += `<span class="correction-value ${colorClass}">Correction: ${prefix}${res.correction} ${res.unit}</span>`;
+        // Format: Pressure Altitude: 360 ft (Correction: -360 ft)
+        html += `<span class="pa-value" style="display:block; margin-bottom: 4px;">Pressure Altitude: ${res.pressureAltitude} ${res.unit}</span>`;
+        html += `<span class="correction-value ${colorClass}" style="opacity: 0.9; font-size: 0.9em;">(Correction: ${prefix}${res.correction} ${res.unit})</span>`;
+
         display.innerHTML = html;
     }
 
     // --- Logic: Vicenty Helpers ---
 
     function _validateAndGetCoords(prefix, errorContainerId) {
-        const fmt = document.getElementById('coord_fmt').value;
-        const errors = [];
+        const getDD = (type, max, name) => {
+            const val = parseFloat(localStorage.getItem(`${prefix}_${type}_dd`));
 
-        const getVal = (id, max, fieldName) => {
-            const el = document.getElementById(id);
-            if (!el) return 0;
-            el.classList.remove('invalid');
-            const v = parseFloat(el.value);
-            if (isNaN(v) || v < 0) {
-                el.classList.add('invalid');
-                errors.push(`${fieldName}: Invalid number`);
-                return -1;
+            // Check for NaN (should be handled by save logic, but good safety)
+            if (isNaN(val)) {
+                return { err: `${name}: Invalid number` };
             }
-            if (v >= max) { // Simple check, exact limits logic can be more complex if needed
-                el.classList.add('invalid');
-                errors.push(`${fieldName}: Must be < ${max}`);
-                return -1;
+            // Simple range check
+            if (Math.abs(val) > max) {
+                return { err: `${name}: Must be <= ${max}°` };
             }
-            return v;
+            return { val };
         };
 
-        const hLat = parseFloat(document.getElementById(`${prefix}_lat_h`).value);
-        const hLon = parseFloat(document.getElementById(`${prefix}_lon_h`).value);
+        const latObj = getDD('lat', 90, 'Lat');
+        const lonObj = getDD('lon', 180, 'Lon');
 
-        // Degrees
-        const dLat = getVal(`${prefix}_lat_d`, 91, 'Lat Deg'); // Allow 90 exactly? Let's say < 91 for now
-        const dLon = getVal(`${prefix}_lon_d`, 181, 'Lon Deg');
-
-        let mLat = 0, MLon = 0, sLat = 0, sLon = 0;
-
-        if (fmt !== 'DD') {
-            mLat = getVal(`${prefix}_lat_m`, 60, 'Lat Min');
-            MLon = getVal(`${prefix}_lon_m`, 60, 'Lon Min');
-        }
-        if (fmt === 'DMS') {
-            sLat = getVal(`${prefix}_lat_s`, 60, 'Lat Sec');
-            sLon = getVal(`${prefix}_lon_s`, 60, 'Lon Sec');
-        }
-
-        if (errors.length > 0) {
+        if (latObj.err || lonObj.err) {
             const errDiv = document.getElementById(errorContainerId);
-            errDiv.innerHTML = `<span class="result-error">⚠️ Check inputs marked in red.</span>`;
+            const msg = latObj.err || lonObj.err;
+            errDiv.innerHTML = `<span class="result-error">⚠️ ${msg}</span>`;
             return null;
         }
 
-        // Calculation
-        const lat = (dLat + mLat / 60 + sLat / 3600) * hLat;
-        const lon = (dLon + MLon / 60 + sLon / 3600) * hLon;
-
-        return { lat, lon };
+        return { lat: latObj.val, lon: lonObj.val };
     }
 
     function _formatCoords(lat, lon) {
@@ -349,7 +506,7 @@ const UI = (function () {
             if (fmt === 'DD') return `${hemi} ${abs.toFixed(5)}°`;
 
             const minFull = (abs - deg) * 60;
-            if (fmt === 'DDM') return `${hemi} ${deg}° ${minFull.toFixed(3)}'`;
+            if (fmt === 'DDM') return `${hemi} ${deg}° ${minFull.toFixed(5)}'`;
 
             const min = Math.floor(minFull);
             const sec = ((minFull - min) * 60).toFixed(2);
@@ -396,6 +553,16 @@ const UI = (function () {
 
         if (isNaN(dist) || isNaN(brng)) {
             document.getElementById('dest_res').innerHTML = '<span class="result-error">Invalid Range or Bearing</span>';
+            return;
+        }
+
+        if (dist < 0) {
+            document.getElementById('dest_res').innerHTML = '<span class="result-error">Range cannot be negative</span>';
+            return;
+        }
+
+        if (brng < -360 || brng > 360) {
+            document.getElementById('dest_res').innerHTML = '<span class="result-error">Bearing must be between -360 and 360</span>';
             return;
         }
 

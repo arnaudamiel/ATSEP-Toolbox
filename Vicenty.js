@@ -139,7 +139,7 @@ const Vicenty = (function () {
         } while (Math.abs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
 
         if (iterLimit === 0) {
-            throw new Error("Formula failed to converge (Antipodal?)");
+            throw new Error("Antipodal Limit reached (Points are nearly opposite)");
         }
 
         const uSq = cosSqAlpha * (WGS84_a * WGS84_a - WGS84_b * WGS84_b) / (WGS84_b * WGS84_b);
