@@ -8,355 +8,28 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a202c">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --color-gray-900: #1a202c;
-            --color-gray-800: #2d3748;
-            --color-gray-700: #4a5568;
-            --color-gray-500: #e2e8f0;
-            --color-gray-400: #cbd5e0;
-            --color-blue-500: #63b3ed;
-            --color-blue-600: #4299e1;
-            --color-green-500: #48bb78;
-            --color-red-500: #f56565;
-            --color-red-400: #fc8181;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--color-gray-900);
-            color: var(--color-gray-500);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 1rem;
-        }
-
-        .calculator-card {
-            background-color: var(--color-gray-800);
-            padding: 2.2rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            max-width: 480px;
-            width: 100%;
-            border: 1px solid var(--color-gray-700);
-            position: relative;
-            min-height: 650px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .tab-nav {
-            display: flex;
-            background-color: var(--color-gray-900);
-            padding: 6px;
-            border-radius: 0.85rem;
-            margin-bottom: 2rem;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 0.8rem;
-            border: none;
-            background: transparent;
-            color: var(--color-gray-400);
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 0.6rem;
-            font-size: 0.85rem;
-        }
-
-        .tab-btn.active {
-            background-color: var(--color-gray-700);
-            color: white;
-        }
-
-        .tab-panel {
-            display: none;
-            flex-grow: 1;
-        }
-
-        .tab-panel.active {
-            display: flex;
-            flex-direction: column;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .label-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--color-gray-400);
-        }
-
-        .coord-row {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.6rem;
-            width: 100%;
-        }
-
-        .hem-select {
-            width: 65px;
-            flex-shrink: 0;
-            background-color: var(--color-gray-900);
-            color: var(--color-blue-500);
-            font-weight: 700;
-            border: 1px solid var(--color-gray-700);
-            border-radius: 0.6rem;
-            cursor: pointer;
-        }
-
-        .num-input {
-            flex: 1;
-            min-width: 0;
-            background-color: var(--color-gray-700);
-            color: white;
-            border: 1px solid var(--color-gray-700);
-            border-radius: 0.6rem;
-            padding: 0.85rem;
-            font-size: 1rem;
-        }
-
-        .num-input:focus {
-            outline: none;
-            border-color: var(--color-blue-500);
-        }
-
-        .num-input.invalid {
-            border-color: var(--color-red-500);
-            background-color: rgba(245, 101, 101, 0.1);
-        }
-
-        .full-select {
-            width: 100%;
-            background-color: var(--color-gray-700);
-            color: white;
-            border: 1px solid var(--color-gray-700);
-            border-radius: 0.6rem;
-            padding: 0.85rem;
-            font-size: 1rem;
-            appearance: none;
-            cursor: pointer;
-        }
-
-        .calculate-btn {
-            background-color: var(--color-blue-500);
-            color: white;
-            padding: 1.2rem;
-            border-radius: 0.8rem;
-            font-weight: 700;
-            width: 100%;
-            border: none;
-            cursor: pointer;
-            margin-top: auto;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-        }
-
-        .calculate-btn:hover {
-            background-color: var(--color-blue-600);
-        }
-
-        .result-container {
-            position: relative;
-            margin-top: 0.5rem;
-        }
-
-        .result-box {
-            background-color: var(--color-gray-900);
-            padding: 1.5rem;
-            border-radius: 0.8rem;
-            text-align: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            border: 1px solid var(--color-blue-500);
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            color: var(--color-gray-400);
-            cursor: pointer;
-            font-size: 1.1rem;
-        }
-
-        .ducky-mascot {
-            position: absolute;
-            bottom: 10px;
-            left: 24px;
-            font-size: 1.8rem;
-            opacity: 0.9;
-            cursor: help;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        /* QNH SPECIFIC STYLES - Ported from QNH.html */
-        .input-field {
-            background-color: var(--color-gray-700);
-            color: var(--color-gray-500);
-            border: 1px solid var(--color-gray-700);
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
-            width: 100%;
-            margin-top: 0.5rem;
-            transition: all 0.2s;
-            appearance: none;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: var(--color-blue-500);
-            box-shadow: 0 0 0 2px rgba(99, 179, 237, 0.5);
-        }
-
-        .warning-text {
-            color: var(--color-red-500);
-            display: block;
-            font-size: 0.95rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .correction-value {
-            display: block;
-        }
-
-        .result-positive {
-            color: var(--color-green-500);
-        }
-
-        .result-negative {
-            color: var(--color-red-400);
-        }
-
-        .result-error {
-            color: var(--color-red-500);
-        }
-
-        .result-box[data-warning="true"] {
-            border: 2px solid var(--color-blue-500);
-            background-color: rgba(99, 179, 237, 0.08);
-        }
-
-        /* Utility classes from QNH.html */
-        .text-3xl {
-            font-size: 1.875rem;
-        }
-
-        .font-bold {
-            font-weight: 700;
-        }
-
-        .mb-2 {
-            margin-bottom: 0.5rem;
-        }
-
-        .text-sm {
-            font-size: 0.875rem;
-        }
-
-        .text-gray-400 {
-            color: var(--color-gray-400);
-        }
-
-        .mb-6 {
-            margin-bottom: 1.5rem;
-        }
-
-        .mb-4 {
-            margin-bottom: 1rem;
-        }
-
-        .text-left {
-            text-align: left;
-        }
-
-        .block {
-            display: block;
-        }
-
-        .font-medium {
-            font-weight: 500;
-        }
-
-        .text-gray-300 {
-            color: var(--color-gray-400);
-        }
-
-        .flex {
-            display: flex;
-        }
-
-        .items-center {
-            align-items: center;
-        }
-
-        .space-x-2> :not([hidden])~ :not([hidden]) {
-            margin-left: 0.5rem;
-        }
-
-        .flex-grow {
-            flex-grow: 1;
-        }
-
-        .w-auto {
-            width: auto;
-        }
-
-        .w-full {
-            width: 100%;
-        }
-
-        .mt-6 {
-            margin-top: 1.5rem;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
     <div class="calculator-card">
         <div class="tab-nav">
-            <button class="tab-btn active" onclick="switchTab(event, 'qnh-panel')">QNH</button>
-            <button class="tab-btn" onclick="switchTab(event, 'range-panel')">RANGE</button>
-            <button class="tab-btn" onclick="switchTab(event, 'dest-panel')">DEST</button>
+            <button class="tab-btn active" data-tab="qnh-panel">QNH</button>
+            <button class="tab-btn" data-tab="range-panel">RANGE</button>
+            <button class="tab-btn" data-tab="dest-panel">DEST</button>
         </div>
 
-        <select id="coord_fmt" class="save-val" style="display:none" onchange="updateAllUI()">
+        <!-- Global Settings (Hidden by default, used by JS) -->
+        <select id="coord_fmt" class="save-val" style="display:none">
             <option value="DD">DD</option>
             <option value="DDM">DDM</option>
             <option value="DMS">DMS</option>
         </select>
 
+        <!-- QNH Panel -->
         <div id="qnh-panel" class="tab-panel active">
-            <h1 class="text-3xl font-bold mb-2">QNH Correction Calculator</h1>
+            <h1 class="text-3xl font-bold mb-2 app-title">QNH Correction</h1>
 
             <div class="mb-4 text-left">
                 <label for="pressureInput" class="block text-sm font-medium text-gray-300">Pressure Setting
@@ -384,67 +57,78 @@
 
             <button id="calculateButton" type="button" class="calculate-btn w-full mt-6">Calculate Correction</button>
 
-            <div id="resultDisplay" class="result-box" role="status" aria-live="polite">
+            <div id="resultDisplay" class="result-box mt-6" role="status" aria-live="polite">
                 Enter pressure to get the correction.
             </div>
         </div>
 
+        <!-- Range and BearingPanel -->
         <div id="range-panel" class="tab-panel">
+            <h1 class="text-3xl font-bold mb-2 app-title">Range and Bearing Calculator</h1>
             <div class="label-row">
                 <span>Coordinates</span>
                 <div>
-                    <select id="range_fmt_sel" class="save-val" onchange="updateFmt(this.value)"
-                        style="color:var(--color-blue-500); background:none; border:none; font-weight:bold; cursor:pointer;">
+                    <select id="range_fmt_sel" class="clean-select save-val">
                         <option value="DD">DD</option>
                         <option value="DDM">DDM</option>
                         <option value="DMS">DMS</option>
                     </select>
-                    <select id="range_unit_type" class="save-val" onchange="updateDistUnit(this.value)"
-                        style="color:var(--color-blue-500); background:none; border:none; font-weight:bold; cursor:pointer;">
+                    <select id="range_unit_type" class="clean-select save-val">
                         <option value="NM">NM</option>
                         <option value="M">M</option>
                     </select>
                 </div>
             </div>
+
             <div id="r_origin_inputs" class="input-group"></div>
             <div id="r_dest_inputs" class="input-group"></div>
-            <button class="calculate-btn" onclick="runRange()">Calculate Vectors</button>
-            <div class="result-container"><button class="copy-btn" onclick="copyResult('range_res')">📋</button>
+
+            <button class="calculate-btn">Calculate Vectors</button>
+
+            <div class="result-container">
+                <button class="copy-btn" data-target="range_res">📋</button>
                 <div id="range_res" class="result-box">---</div>
             </div>
         </div>
 
+        <!-- Destination Panel -->
         <div id="dest-panel" class="tab-panel">
+            <h1 class="text-3xl font-bold mb-2 app-title">Destination Calculator</h1>
             <div class="label-row">
                 <span>Origin Point</span>
-                <select id="dest_fmt_sel" class="save-val" onchange="updateFmt(this.value)"
-                    style="color:var(--color-blue-500); background:none; border:none; font-weight:bold; cursor:pointer;">
+                <select id="dest_fmt_sel" class="clean-select save-val">
                     <option value="DD">DD</option>
                     <option value="DDM">DDM</option>
                     <option value="DMS">DMS</option>
                 </select>
             </div>
+
             <div id="d_start_inputs" class="input-group"></div>
+
             <div class="input-group">
                 <div class="label-row">
                     <span>Vector Input</span>
-                    <select id="d_unit" class="save-val" onchange="updateDistUnit(this.value)"
-                        style="color:var(--color-blue-500); background:none; border:none; font-weight:bold; cursor:pointer;">
+                    <select id="d_unit" class="clean-select save-val">
                         <option value="NM">NM</option>
                         <option value="M">M</option>
                     </select>
                 </div>
                 <div style="display: flex; gap: 0.8rem;">
-                    <div style="flex:1"><small
-                            style="display:block; margin-bottom:4px; opacity:0.7;">Range</small><input type="number"
-                            id="d_dist" class="num-input save-val" placeholder="0.0"></div>
-                    <div style="flex:1"><small style="display:block; margin-bottom:4px; opacity:0.7;">Bearing
-                            (°T)</small><input type="number" id="d_brng" class="num-input save-val" placeholder="360">
+                    <div style="flex:1">
+                        <small style="display:block; margin-bottom:4px; opacity:0.7;">Range</small>
+                        <input type="number" id="d_dist" class="num-input save-val" placeholder="0.0">
+                    </div>
+                    <div style="flex:1">
+                        <small style="display:block; margin-bottom:4px; opacity:0.7;">Bearing (°T)</small>
+                        <input type="number" id="d_brng" class="num-input save-val" placeholder="360">
                     </div>
                 </div>
             </div>
-            <button class="calculate-btn" onclick="runDest()">Project Destination</button>
-            <div class="result-container"><button class="copy-btn" onclick="copyResult('dest_res')">📋</button>
+
+            <button class="calculate-btn">Project Destination</button>
+
+            <div class="result-container">
+                <button class="copy-btn" data-target="dest_res">📋</button>
                 <div id="dest_res" class="result-box">---</div>
             </div>
         </div>
@@ -452,498 +136,13 @@
         <div class="ducky-mascot" title="Ducky: Ducky is here to help! Quack!">🦆</div>
     </div>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => console.log('SW registered'))
-                    .catch(err => console.log('SW registration failed:', err));
-            });
-        }
-
-        function saveValues() { document.querySelectorAll('.save-val').forEach(el => { if (el.id) localStorage.setItem(el.id, el.value); }); }
-        function loadSavedValues() { document.querySelectorAll('.save-val').forEach(el => { const s = localStorage.getItem(el.id); if (s !== null) el.value = s; }); }
-        function copyResult(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); }
-
-        function switchTab(e, id) {
-            document.querySelectorAll('.tab-panel, .tab-btn').forEach(x => x.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if (e) e.currentTarget.classList.add('active');
-            localStorage.setItem('active_tab', id);
-        }
-
-        function updateFmt(val) {
-            // Clear hidden storage values to 0 when format changes to prevent "ghost" data
-            const inputsToClear = ['_m', '_s'];
-            const prefixes = ['r_origin_lat', 'r_origin_lon', 'r_dest_lat', 'r_dest_lon', 'd_start_lat', 'd_start_lon'];
-
-            prefixes.forEach(p => {
-                if (val === 'DD') {
-                    inputsToClear.forEach(sfx => localStorage.setItem(p + sfx, '0'));
-                } else if (val === 'DDM') {
-                    localStorage.setItem(p + '_s', '0');
-                }
-            });
-
-            // Update DOM elements
-            document.getElementById('coord_fmt').value = val;
-            const rSel = document.getElementById('range_fmt_sel');
-            const dSel = document.getElementById('dest_fmt_sel');
-            if (rSel) rSel.value = val;
-            if (dSel) dSel.value = val;
-
-            // Explicitly save to localStorage to prevent loadSavedValues() from reverting programmatic changes
-            localStorage.setItem('range_fmt_sel', val);
-            localStorage.setItem('dest_fmt_sel', val);
-            localStorage.setItem('coord_fmt', val);
-
-            updateAllUI();
-        }
-
-        function updateDistUnit(val) {
-            document.getElementById('range_unit_type').value = val;
-            document.getElementById('d_unit').value = val;
-            // Also sync storage for units to ensure persistence across reload/tabs
-            localStorage.setItem('range_unit_type', val);
-            localStorage.setItem('d_unit', val);
-        }
-
-        function createRow(prefix, type) {
-            const fmt = document.getElementById('coord_fmt').value;
-            let html = `<div class="coord-row">`;
-            html += `<select id="${prefix}_${type}_h" class="hem-select save-val">`;
-            if (type === 'lat') html += `<option value="1">N</option><option value="-1">S</option>`;
-            else html += `<option value="1">E</option><option value="-1">W</option>`;
-            html += `</select>`;
-            html += `<input type="number" id="${prefix}_${type}_d" class="num-input save-val" placeholder="°">`;
-            if (fmt !== 'DD') html += `<input type="number" id="${prefix}_${type}_m" class="num-input save-val" placeholder="'">`;
-            if (fmt === 'DMS') html += `<input type="number" id="${prefix}_${type}_s" class="num-input save-val" placeholder="''">`;
-            html += `</div>`;
-            return html;
-        }
-
-        function updateAllUI() {
-            ['r_origin', 'r_dest', 'd_start'].forEach(t => {
-                const el = document.getElementById(t + '_inputs');
-                if (el) el.innerHTML = createRow(t, 'lat') + createRow(t, 'lon');
-            });
-            loadSavedValues();
-        }
-
-        function validateAndGet(prefix, resultBoxId) {
-            const fmt = document.getElementById('coord_fmt').value;
-            const resultBox = document.getElementById(resultBoxId);
-            let errors = [];
-
-            const check = (id, max, name, isDeg) => {
-                const el = document.getElementById(id);
-                if (!el) return 0;
-                el.classList.remove('invalid');
-                const val = el.value === "" ? 0 : parseFloat(el.value);
-
-                // Strict validation:
-                // Degrees: 0 <= val <= max (Lat 90, Lon 180)
-                // Min/Sec: 0 <= val < 60 (standard sexagesimal)
-                let invalid = false;
-                let limitMsg = "";
-
-                if (isNaN(val) || val < 0) {
-                    invalid = true;
-                    limitMsg = "must be positive";
-                } else if (isDeg) {
-                    if (val > max) {
-                        invalid = true;
-                        limitMsg = `0 - ${max}`;
-                    }
-                } else {
-                    // Minutes/Seconds
-                    if (val >= 60) {
-                        invalid = true;
-                        limitMsg = `0 - 59.99...`; // Clearer message for user
-                    }
-                }
-
-                if (invalid) {
-                    el.classList.add('invalid');
-                    errors.push(`${name}: ${limitMsg}`);
-                    return null;
-                }
-                return val;
-            };
-
-            const latH = parseFloat(document.getElementById(`${prefix}_lat_h`).value);
-            const lonH = parseFloat(document.getElementById(`${prefix}_lon_h`).value);
-            const latD = check(`${prefix}_lat_d`, 90, "Lat Deg", true);
-            const lonD = check(`${prefix}_lon_d`, 180, "Lon Deg", true);
-            let latM = 0, lonM = 0, latS = 0, lonS = 0;
-
-            if (fmt !== 'DD') {
-                latM = check(`${prefix}_lat_m`, 60, "Lat Min", false);
-                lonM = check(`${prefix}_lon_m`, 60, "Lon Min", false);
-            }
-            if (fmt === 'DMS') {
-                latS = check(`${prefix}_lat_s`, 60, "Lat Sec", false);
-                lonS = check(`${prefix}_lon_s`, 60, "Lon Sec", false);
-            }
-
-            if (errors.length > 0) {
-                resultBox.innerHTML = `<div style="color:var(--color-red-500)">⚠️ Errors:<br>${errors.join('<br>')}</div>`;
-                return null;
-            }
-
-            return {
-                lat: (latD + latM / 60 + latS / 3600) * latH,
-                lon: (lonD + lonM / 60 + lonS / 3600) * lonH
-            };
-        }
-
-        function formatOutput(lat, lon) {
-            const fmt = document.getElementById('coord_fmt').value;
-            const convert = (val, isLat) => {
-                const h = isLat ? (val >= 0 ? 'N' : 'S') : (val >= 0 ? 'E' : 'W');
-                const a = Math.abs(val);
-                if (fmt === 'DD') return `${h} ${a.toFixed(5)}`;
-                const d = Math.floor(a);
-                const mFull = (a - d) * 60;
-                if (fmt === 'DDM') return `${h} ${d}° ${mFull.toFixed(3)}'`;
-                const m = Math.floor(mFull);
-                const s = ((mFull - m) * 60).toFixed(1);
-                return `${h} ${d}° ${m}' ${s}"`;
-            };
-            return `${convert(lat, true)}, ${convert(lon, false)}`;
-        }
-
-        /**
-         * WGS-84 Ellipsoid Constants
-         * These constants define the shape of the Earth for high-accuracy geodesic calculations.
-         */
-        const WGS84_a = 6378137.0;          // Major axis (meters)
-        const WGS84_b = 6356752.314245;     // Minor axis (meters)
-        const WGS84_f = 1 / 298.257223563;  // Flattening
-
-        /**
-         * Projects a destination point given a starting point, distance, and bearing.
-         * Uses Vincenty's Direct Algorithm for WGS-84.
-         * Accurate to within a few millimeters.
-         */
-        function runDest() {
-            // 1. Validate inputs
-            const start = validateAndGet('d_start', 'dest_res');
-            if (!start) return;
-
-            const distEl = document.getElementById('d_dist');
-            const brngEl = document.getElementById('d_brng');
-
-            // Clear previous invalid styles
-            distEl.classList.remove('invalid');
-            brngEl.classList.remove('invalid');
-
-            let s = parseFloat(distEl.value || 0); // Distance
-            let alpha1 = parseFloat(brngEl.value || 0); // Initial Bearing
-            const inputUnit = document.getElementById('d_unit').value;
-
-            let errors = [];
-            if (s < 0) {
-                distEl.classList.add('invalid');
-                errors.push("Range: Must be positive");
-            }
-            if (alpha1 < -360 || alpha1 > 360) {
-                brngEl.classList.add('invalid');
-                errors.push("Bearing: Must be -360° to 360°");
-            }
-
-            if (errors.length > 0) {
-                document.getElementById('dest_res').innerHTML = `<div style="color:var(--color-red-500)">⚠️ Errors:<br>${errors.join('<br>')}</div>`;
-                return;
-            }
-
-            // 2. Convert inputs to base units (meters, radians)
-            if (inputUnit === 'NM') s *= 1852; // Convert Nautical Miles to Meters
-
-            const toRad = d => d * Math.PI / 180;
-            const toDeg = r => r * 180 / Math.PI;
-
-            const phi1 = toRad(start.lat);
-            const L1 = toRad(start.lon);
-            alpha1 = toRad(alpha1);
-
-            // 3. Vincenty Direct Formula Setup
-            const sinAlpha1 = Math.sin(alpha1);
-            const cosAlpha1 = Math.cos(alpha1);
-
-            const tanU1 = (1 - WGS84_f) * Math.tan(phi1);
-            const cosU1 = 1 / Math.sqrt((1 + tanU1 * tanU1));
-            const sinU1 = tanU1 * cosU1;
-
-            const sigma1 = Math.atan2(tanU1, cosAlpha1);
-            const sinAlpha = cosU1 * sinAlpha1;
-            const cosSqAlpha = 1 - sinAlpha * sinAlpha;
-            const uSq = cosSqAlpha * (WGS84_a * WGS84_a - WGS84_b * WGS84_b) / (WGS84_b * WGS84_b);
-
-            const A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
-            const B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
-
-            let sigma = s / (WGS84_b * A);
-            let sigmaP = 2 * Math.PI;
-            let sinSigma, cosSigma, cos2SigmaM, deltaSigma;
-
-            // 4. Iterative Calculation
-            let iterLimit = 100;
-            while (Math.abs(sigma - sigmaP) > 1e-12 && --iterLimit > 0) {
-                cos2SigmaM = Math.cos(2 * sigma1 + sigma);
-                sinSigma = Math.sin(sigma);
-                cosSigma = Math.cos(sigma);
-                deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
-                    B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
-                sigmaP = sigma;
-                sigma = s / (WGS84_b * A) + deltaSigma;
-            }
-
-            if (iterLimit === 0) {
-                document.getElementById('dest_res').innerHTML = `<span style="color:var(--color-red-500)">⚠️ Formula failed to converge</span>`;
-                return;
-            }
-
-            // 5. Final Coordinates Calculation
-            const tmp = sinU1 * sinSigma - cosU1 * cosSigma * cosAlpha1;
-            const phi2 = Math.atan2(sinU1 * cosSigma + cosU1 * sinSigma * cosAlpha1,
-                (1 - WGS84_f) * Math.sqrt(sinAlpha * sinAlpha + tmp * tmp));
-
-            const lambda = Math.atan2(sinSigma * sinAlpha1, cosU1 * cosSigma - sinU1 * sinSigma * cosAlpha1);
-            const C = WGS84_f / 16 * cosSqAlpha * (4 + WGS84_f * (4 - 3 * cosSqAlpha));
-            const L = lambda - (1 - C) * WGS84_f * sinAlpha *
-                (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
-
-            const L2 = L1 + L;
-
-            // 6. Display Result
-            document.getElementById('dest_res').innerHTML = `<span style="color:var(--color-green-500)">${formatOutput(toDeg(phi2), toDeg(L2))}</span>`;
-        }
-
-        /**
-         * Calculates the Geodesic distance and bearings between two points.
-         * Uses Vincenty's Inverse Algorithm for WGS-84.
-         * Accurate to within a few millimeters.
-         */
-        function runRange() {
-            // 1. Validate inputs
-            const p1 = validateAndGet('r_origin', 'range_res');
-            const p2 = validateAndGet('r_dest', 'range_res');
-            if (!p1 || !p2) return;
-
-            const toRad = d => d * Math.PI / 180;
-            const toDeg = r => r * 180 / Math.PI;
-
-            const phi1 = toRad(p1.lat), L1 = toRad(p1.lon);
-            const phi2 = toRad(p2.lat), L2 = toRad(p2.lon);
-
-            const L = L2 - L1; // Difference in longitude
-
-            // 2. Vincenty Inverse Formula Setup
-            const tanU1 = (1 - WGS84_f) * Math.tan(phi1);
-            const cosU1 = 1 / Math.sqrt((1 + tanU1 * tanU1));
-            const sinU1 = tanU1 * cosU1;
-
-            const tanU2 = (1 - WGS84_f) * Math.tan(phi2);
-            const cosU2 = 1 / Math.sqrt((1 + tanU2 * tanU2));
-            const sinU2 = tanU2 * cosU2;
-
-            let lambda = L;
-            let lambdaP;
-            let iterLimit = 100;
-
-            let sinLambda, cosLambda, sinSigma, cosSigma, sigma, sinAlpha, cosSqAlpha, cos2SigmaM, C;
-
-            // 3. Iterative Calculation
-            do {
-                sinLambda = Math.sin(lambda);
-                cosLambda = Math.cos(lambda);
-                sinSigma = Math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda) +
-                    (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
-
-                if (sinSigma === 0) {
-                    // Co-incident points
-                    document.getElementById('range_res').innerHTML = `<span style="color:var(--color-green-500)">0 ${document.getElementById('range_unit_type').value} / 0°T</span>`;
-                    return;
-                }
-
-                cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
-                sigma = Math.atan2(sinSigma, cosSigma);
-                sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
-                cosSqAlpha = 1 - sinAlpha * sinAlpha;
-
-                cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha;
-                if (isNaN(cos2SigmaM)) cos2SigmaM = 0; // Equatorial line: cosSqAlpha=0
-
-                C = WGS84_f / 16 * cosSqAlpha * (4 + WGS84_f * (4 - 3 * cosSqAlpha));
-                lambdaP = lambda;
-                lambda = L + (1 - C) * WGS84_f * sinAlpha *
-                    (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
-
-            } while (Math.abs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
-
-            if (iterLimit === 0) {
-                document.getElementById('range_res').innerHTML = `<span style="color:var(--color-red-500)">⚠️ Formula failed to converge (Antipodal?)</span>`;
-                return;
-            }
-
-            // 4. Calculate Distance and Azimuths
-            const uSq = cosSqAlpha * (WGS84_a * WGS84_a - WGS84_b * WGS84_b) / (WGS84_b * WGS84_b);
-            const A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
-            const B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
-            const deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
-                B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
-
-            const s = WGS84_b * A * (sigma - deltaSigma); // Distance in meters
-
-            const fwdAz = Math.atan2(cosU2 * sinLambda, cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
-            const initialBearing = (toDeg(fwdAz) + 360) % 360;
-
-            // 5. Convert and Display Result
-            const outputUnit = document.getElementById('range_unit_type').value;
-            let displayDist = s;
-            if (outputUnit === 'NM') displayDist = s / 1852;
-
-            document.getElementById('range_res').innerHTML = `<span style="color:var(--color-green-500)">${displayDist.toFixed(2)} ${outputUnit} / ${Math.round(initialBearing)}°T</span>`;
-        }
-
-        /**
-         * Standard Constants
-         * As published by ICAO in Manual of the ICAO Standard Atmosphere, Doc 7488/3
-         */
-        const STANDARD_PRESSURE_HPA = 1013.25;
-        const INHG_TO_HPA = 33.86389;
-        const FEET_TO_METERS = 0.3048;
-
-        const T0 = 288.15; // Sea level standard temperature in K;
-        const L = 0.0065; // Standard temperature lapse rate in K/m
-        const g = 9.80665; // Gravitational acceleration in m/s^2
-        const Rs = 287.05287; // Specific gas constant for dry air in J/(kg . K)
-
-        const PRESSURE_LIMITS_HPA = {
-            hardMin: 850,
-            hardMax: 1100,
-            warningMin: 920,
-            warningMax: 1060
-        };
-
-        function formatPressureValue(val, unit) {
-            if (unit === 'inHg') {
-                return parseFloat(val).toFixed(2);
-            }
-            return Math.round(val);
-        }
-
-        function getFormattedLimit(hpaLimit, unit) {
-            const converted = (unit === 'inHg') ? (hpaLimit / INHG_TO_HPA) : hpaLimit;
-            return formatPressureValue(converted, unit);
-        }
-
-        function updatePressureInputAttributes() {
-            const pressureUnit = document.getElementById('pressureUnit').value;
-            const pressureInputEl = document.getElementById('pressureInput');
-
-            if (pressureUnit === 'inHg') {
-                pressureInputEl.step = "0.01";
-                pressureInputEl.placeholder = "e.g., 29.92";
-            } else {
-                pressureInputEl.step = "1";
-                pressureInputEl.placeholder = "e.g., 1013";
-            }
-        }
-
-        function calculateQnhCorrection() {
-            const pressureInput = document.getElementById('pressureInput');
-            const pressureUnit = document.getElementById('pressureUnit').value;
-            const correctionUnit = document.getElementById('correctionUnit').value;
-            const resultDisplay = document.getElementById('resultDisplay');
-
-            // Clear previous result
-            resultDisplay.innerHTML = '';
-            resultDisplay.removeAttribute('data-warning');
-
-            const rawInputValue = parseFloat(pressureInput.value);
-
-            if (isNaN(rawInputValue) || rawInputValue <= 0) {
-                resultDisplay.innerHTML = '<span class="result-error">Please enter a valid positive pressure value.</span>';
-                return;
-            }
-
-            let pressureInHPa = (pressureUnit === 'inHg') ? rawInputValue * INHG_TO_HPA : rawInputValue;
-
-            const displayValue = formatPressureValue(rawInputValue, pressureUnit);
-            const displayMin = getFormattedLimit(PRESSURE_LIMITS_HPA.hardMin, pressureUnit);
-            const displayMax = getFormattedLimit(PRESSURE_LIMITS_HPA.hardMax, pressureUnit);
-            const warnMin = getFormattedLimit(PRESSURE_LIMITS_HPA.warningMin, pressureUnit);
-            const warnMax = getFormattedLimit(PRESSURE_LIMITS_HPA.warningMax, pressureUnit);
-
-            if (pressureInHPa < PRESSURE_LIMITS_HPA.hardMin || pressureInHPa > PRESSURE_LIMITS_HPA.hardMax) {
-                resultDisplay.innerHTML = `<span class="result-error">⚠️ Error: Pressure ${displayValue} ${pressureUnit} is outside realistic limits (${displayMin}–${displayMax} ${pressureUnit}).</span>`;
-                return;
-            }
-
-            let warningHtml = '';
-            if (pressureInHPa < PRESSURE_LIMITS_HPA.warningMin || pressureInHPa > PRESSURE_LIMITS_HPA.warningMax) {
-                warningHtml = `<span class="warning-text">⚠️ Warning: Pressure outside typical range (${warnMin}–${warnMax} ${pressureUnit}).</span>`;
-                resultDisplay.setAttribute('data-warning', 'true');
-            }
-
-            // This is the barometric formula to compute altitude difference in feet
-            // In line with the Manual of the ICAO Standard Atmosphere, Doc 7488/3
-            let correctionInFeet = ((pressureInHPa / STANDARD_PRESSURE_HPA) ** (Rs * L / g) - 1) * (T0 / L / FEET_TO_METERS);
-            let finalCorrection;
-            let finalUnit;
-
-            // Then converted to requested unit
-            if (correctionUnit === 'FL') {
-                finalCorrection = Math.round(correctionInFeet / 100);
-                finalUnit = 'FL';
-            } else if (correctionUnit === 'feet') {
-                finalCorrection = Math.round(correctionInFeet);
-                finalUnit = 'ft';
-            } else if (correctionUnit === 'meters') {
-                finalCorrection = Math.round(correctionInFeet * FEET_TO_METERS);
-                finalUnit = 'm';
-            }
-
-            let colorClass = '';
-            let prefix = '';
-            if (finalCorrection > 0) {
-                colorClass = 'result-positive';
-                prefix = '+';
-            } else if (finalCorrection < 0) {
-                colorClass = 'result-negative';
-            }
-
-            const correctionHtml = `<span class="correction-value ${colorClass}">Correction: ${prefix}${finalCorrection} ${finalUnit}</span>`;
-            resultDisplay.innerHTML = warningHtml + correctionHtml;
-        }
-
-        document.addEventListener('input', saveValues);
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSavedValues();
-            updateAllUI();
-            const lastTab = localStorage.getItem('active_tab') || 'qnh-panel';
-            switchTab(null, lastTab);
-
-            // QNH Initialization
-            const button = document.getElementById('calculateButton');
-            const pressureUnitEl = document.getElementById('pressureUnit');
-            const pressureInputEl = document.getElementById('pressureInput');
-
-            updatePressureInputAttributes(); // Ensure attributes match loaded defaults or saved unit
-
-            button.addEventListener('click', calculateQnhCorrection);
-            pressureUnitEl.addEventListener('change', updatePressureInputAttributes);
-
-            pressureInputEl.addEventListener('keydown', (ev) => {
-                if (ev.key === 'Enter') {
-                    ev.preventDefault();
-                    calculateQnhCorrection();
-                }
-            });
-        });
-    </script>
+    <!-- Computation Modules -->
+    <script src="Vicenty.js"></script>
+    <script src="QNH.js"></script>
+
+    <!-- Application Logic -->
+    <script src="ui.js"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>

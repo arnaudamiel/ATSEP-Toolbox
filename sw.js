@@ -1,4 +1,4 @@
-const CACHE_NAME = 'atsep-calc-v3';
+const CACHE_NAME = 'atsep-calc-v4';
 const ASSETS_TO_CACHE = [
     './',
     './ATSEP.html',
