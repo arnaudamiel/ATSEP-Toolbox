@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATSEP Toolbox - Unit Tests</title>
+    <style>
+        :root {
+            --color-pass: #48bb78;
+            --color-fail: #f56565;
+            --color-bg: #1a202c;
+            --color-card: #2d3748;
+            --color-text: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            padding: 2rem;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        h1 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--color-pass);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 {
+            color: var(--color-pass);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .test-result {
+            padding: 0.5rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .pass {
+            background-color: rgba(72, 187, 120, 0.2);
+            border-left: 4px solid var(--color-pass);
+        }
+
+        .fail {
+            background-color: rgba(245, 101, 101, 0.2);
+            border-left: 4px solid var(--color-fail);
+            font-weight: bold;
+        }
+
+        .summary {
+            background-color: var(--color-card);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            font-size: 1.2rem;
+        }
+
+        .summary.all-pass {
+            border: 2px solid var(--color-pass);
+        }
+
+        .summary.has-failures {
+            border: 2px solid var(--color-fail);
+        }
+
+        .pass-count {
+            color: var(--color-pass);
+            font-weight: bold;
+        }
+
+        .fail-count {
+            color: var(--color-fail);
+            font-weight: bold;
+        }
+
+        .details {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-left: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 ATSEP Toolbox - Unit Tests</h1>
+    <p>Testing QNH and Vincenty calculation modules.</p>
+
+    <div id="results"></div>
+    <div id="summary" class="summary"></div>
+
+    <!-- Load the modules being tested -->
+    <script src="../constants.js"></script>
+    <script src="../QNH.js"></script>
+    <script src="../Vincenty.js"></script>
+
+    <script>
+        // Test framework
+        const results = document.getElementById('results');
+        const summaryDiv = document.getElementById('summary');
+        let passed = 0;
+        let failed = 0;
+        let currentSection = '';
+
+        function section(name) {
+            currentSection = name;
+            results.innerHTML += `<h2>${name}</h2>`;
+        }
+
+        function test(name, condition, expected, actual) {
+            const status = condition ? 'pass' : 'fail';
+            if (condition) passed++; else failed++;
+
+            let html = `<div class="test-result ${status}">`;
+            html += `${status === 'pass' ? '✓' : '✗'} ${name}`;
+
+            if (!condition) {
+                html += `<span class="details">Expected: ${expected}, Got: ${actual}</span>`;
+            }
+
+            html += '</div>';
+            results.innerHTML += html;
+        }
+
+        function approxEqual(a, b, tolerance = 0.01) {
+            return Math.abs(a - b) < tolerance;
+        }
+
+        function approxEqualPercent(a, b, percentTolerance = 1) {
+            const avg = (Math.abs(a) + Math.abs(b)) / 2;
+            if (avg === 0) return a === b;
+            return (Math.abs(a - b) / avg) * 100 < percentTolerance;
+        }
+
+        // ===============================================
+        // QNH MODULE TESTS
+        // ===============================================
+
+        section('QNH Module - Basic Functionality');
+
+        // Test 1: Standard pressure gives zero correction
+        (function () {
+            const result = QNH.calculate(1013.25, 'hPa', 'feet');
+            test('Standard pressure (1013.25 hPa) gives 0 ft correction',
+                result.correction === 0, 0, result.correction);
+        })();
+
+        // Test 2: Standard pressure gives zero PA
+        (function () {
+            const result = QNH.calculate(1013.25, 'hPa', 'feet');
+            test('Standard pressure gives 0 ft pressure altitude',
+                result.pressureAltitude === 0, 0, result.pressureAltitude);
+        })();
+
+        // Test 3: Low pressure gives negative correction
+        (function () {
+            const result = QNH.calculate(1000, 'hPa', 'feet');
+            test('Low pressure (1000 hPa) gives negative correction',
+                result.correction < 0, 'negative', result.correction);
+        })();
+
+        // Test 4: High pressure gives positive correction
+        (function () {
+            const result = QNH.calculate(1030, 'hPa', 'feet');
+            test('High pressure (1030 hPa) gives positive correction',
+                result.correction > 0, 'positive', result.correction);
+        })();
+
+        // Test 5: Error flag is false for valid input
+        (function () {
+            const result = QNH.calculate(1013, 'hPa', 'feet');
+            test('Valid input returns error: false',
+                result.error === false, false, result.error);
+        })();
+
+        section('QNH Module - Unit Conversions');
+
+        // Test 6: inHg standard pressure
+        (function () {
+            const result = QNH.calculate(29.92, 'inHg', 'feet');
+            test('Standard pressure in inHg (29.92) gives ~0 correction',
+                Math.abs(result.correction) <= 10, '±10 ft', result.correction);
+        })();
+
+        // Test 7: Flight Level output
+        (function () {
+            const result = QNH.calculate(1013.25, 'hPa', 'FL');
+            test('Standard pressure in FL gives unit "FL"',
+                result.unit === 'FL', 'FL', result.unit);
+        })();
+
+        // Test 8: Meters output
+        (function () {
+            const result = QNH.calculate(1000, 'hPa', 'meters');
+            test('Meters output gives unit "m"',
+                result.unit === 'm', 'm', result.unit);
+        })();
+
+        // Test 9: Known value - 1000 hPa should give roughly -364 ft correction
+        (function () {
+            const result = QNH.calculate(1000, 'hPa', 'feet');
+            // At 1000 hPa, pressure altitude is about +364 ft, correction is -364 ft
+            test('1000 hPa gives correction around -360 to -370 ft',
+                result.correction >= -400 && result.correction <= -350, '-360 to -370', result.correction);
+        })();
+
+        section('QNH Module - Error Handling');
+
+        // Test 10: Invalid input (NaN)
+        (function () {
+            const result = QNH.calculate(NaN, 'hPa', 'feet');
+            test('NaN input returns error: true',
+                result.error === true, true, result.error);
+        })();
+
+        // Test 11: Invalid input (negative)
+        (function () {
+            const result = QNH.calculate(-1013, 'hPa', 'feet');
+            test('Negative pressure returns error: true',
+                result.error === true, true, result.error);
+        })();
+
+        // Test 12: Invalid input (zero)
+        (function () {
+            const result = QNH.calculate(0, 'hPa', 'feet');
+            test('Zero pressure returns error: true',
+                result.error === true, true, result.error);
+        })();
+
+        // Test 13: Out of range (too low)
+        (function () {
+            const result = QNH.calculate(800, 'hPa', 'feet');
+            test('Pressure 800 hPa (below 850) returns error',
+                result.error === true, true, result.error);
+        })();
+
+        // Test 14: Out of range (too high)
+        (function () {
+            const result = QNH.calculate(1150, 'hPa', 'feet');
+            test('Pressure 1150 hPa (above 1100) returns error',
+                result.error === true, true, result.error);
+        })();
+
+        section('QNH Module - Warnings');
+
+        // Test 15: Warning for low but valid pressure
+        (function () {
+            const result = QNH.calculate(900, 'hPa', 'feet');
+            test('Pressure 900 hPa gives warning: true',
+                result.warning === true, true, result.warning);
+        })();
+
+        // Test 16: No warning for normal pressure
+        (function () {
+            const result = QNH.calculate(1013, 'hPa', 'feet');
+            test('Pressure 1013 hPa gives warning: false',
+                result.warning === false, false, result.warning);
+        })();
+
+        // ===============================================
+        // VINCENTY MODULE TESTS
+        // ===============================================
+
+        section('Vincenty Module - Coincident Points');
+
+        // Test 17: Same point gives zero distance
+        (function () {
+            const result = Vincenty.calculateDistance(51.5, -0.1, 51.5, -0.1);
+            test('Same point gives zero distance or isCoincident',
+                result.isCoincident === true || result.distance === 0,
+                'coincident/0', result.isCoincident ? 'coincident' : result.distance);
+        })();
+
+        section('Vincenty Module - Known Distances');
+
+        // Test 18: London to Paris (~343 km)
+        (function () {
+            const result = Vincenty.calculateDistance(51.5074, -0.1278, 48.8566, 2.3522);
+            const distKm = result.distance / 1000;
+            test('London to Paris is ~343 km (±5 km)',
+                approxEqual(distKm, 343, 5), '343 km', distKm.toFixed(1) + ' km');
+        })();
+
+        // Test 19: New York to Los Angeles (~3940 km)
+        (function () {
+            const result = Vincenty.calculateDistance(40.7128, -74.0060, 34.0522, -118.2437);
+            const distKm = result.distance / 1000;
+            test('NYC to LA is ~3940 km (±20 km)',
+                approxEqual(distKm, 3940, 20), '3940 km', distKm.toFixed(0) + ' km');
+        })();
+
+        // Test 20: Equator crossing (0°, 0° to 0°, 90°) = quarter circumference
+        (function () {
+            const result = Vincenty.calculateDistance(0, 0, 0, 90);
+            const distKm = result.distance / 1000;
+            // Quarter of equatorial circumference ≈ 10018.75 km
+            test('Equator 0° to 90° is ~10,019 km (±50 km)',
+                approxEqual(distKm, 10019, 50), '10,019 km', distKm.toFixed(0) + ' km');
+        })();
+
+        section('Vincenty Module - Bearings');
+
+        // Test 21: Due east bearing
+        (function () {
+            const result = Vincenty.calculateDistance(0, 0, 0, 10);
+            test('Point due east has bearing 90°',
+                approxEqual(result.initialBearing, 90, 1), '90°', result.initialBearing.toFixed(1) + '°');
+        })();
+
+        // Test 22: Due north bearing
+        (function () {
+            const result = Vincenty.calculateDistance(0, 0, 10, 0);
+            test('Point due north has bearing 0°',
+                approxEqual(result.initialBearing, 0, 1), '0°', result.initialBearing.toFixed(1) + '°');
+        })();
+
+        // Test 23: Due south bearing
+        (function () {
+            const result = Vincenty.calculateDistance(10, 0, 0, 0);
+            test('Point due south has bearing 180°',
+                approxEqual(result.initialBearing, 180, 1), '180°', result.initialBearing.toFixed(1) + '°');
+        })();
+
+        section('Vincenty Module - Destination Projection');
+
+        // Test 24: Project east increases longitude
+        (function () {
+            const dest = Vincenty.calculateDestination(51.5, -0.1, 100000, 90);
+            test('100km east increases longitude',
+                dest.lon > -0.1, '> -0.1', dest.lon.toFixed(4));
+        })();
+
+        // Test 25: Project north increases latitude
+        (function () {
+            const dest = Vincenty.calculateDestination(51.5, -0.1, 100000, 0);
+            test('100km north increases latitude',
+                dest.lat > 51.5, '> 51.5', dest.lat.toFixed(4));
+        })();
+
+        // Test 26: Round trip - project and measure back
+        (function () {
+            const start = { lat: 51.5, lon: -0.1 };
+            const dist = 50000; // 50 km
+            const bearing = 45;
+
+            const dest = Vincenty.calculateDestination(start.lat, start.lon, dist, bearing);
+            const back = Vincenty.calculateDistance(start.lat, start.lon, dest.lat, dest.lon);
+
+            test('Round trip: project 50km, measure back gives ~50km',
+                approxEqual(back.distance, dist, 1), '50,000 m', back.distance.toFixed(0) + ' m');
+        })();
+
+        // Test 27: Project 0 distance stays at origin
+        (function () {
+            const dest = Vincenty.calculateDestination(51.5, -0.1, 0, 90);
+            test('0m projection stays at origin latitude',
+                approxEqual(dest.lat, 51.5, 0.0001), '51.5', dest.lat.toFixed(6));
+        })();
+
+        section('Vincenty Module - Edge Cases');
+
+        // Test 28: Poles
+        (function () {
+            const result = Vincenty.calculateDistance(90, 0, 0, 0);
+            const distKm = result.distance / 1000;
+            // North pole to equator = quarter meridian ≈ 10,002 km
+            test('North pole to equator is ~10,002 km',
+                approxEqual(distKm, 10002, 50), '10,002 km', distKm.toFixed(0) + ' km');
+        })();
+
+        // Test 29: Dateline crossing
+        (function () {
+            const result = Vincenty.calculateDistance(0, 179, 0, -179);
+            const distKm = result.distance / 1000;
+            // 2 degrees of longitude at equator ≈ 222 km
+            test('Across dateline (179°E to 179°W) is ~222 km',
+                approxEqual(distKm, 222, 5), '222 km', distKm.toFixed(0) + ' km');
+        })();
+
+        // ===============================================
+        // CONSTANTS MODULE TESTS
+        // ===============================================
+
+        section('Constants Module');
+
+        // Test 30: Constants are defined
+        (function () {
+            test('ATSEP_CONSTANTS is defined',
+                typeof ATSEP_CONSTANTS !== 'undefined', 'defined', typeof ATSEP_CONSTANTS);
+        })();
+
+        // Test 31: WGS-84 semi-major axis
+        (function () {
+            test('WGS84_A is 6378137.0',
+                ATSEP_CONSTANTS.WGS84_A === 6378137.0, 6378137.0, ATSEP_CONSTANTS.WGS84_A);
+        })();
+
+        // Test 32: Standard pressure
+        (function () {
+            test('STANDARD_PRESSURE_HPA is 1013.25',
+                ATSEP_CONSTANTS.STANDARD_PRESSURE_HPA === 1013.25, 1013.25, ATSEP_CONSTANTS.STANDARD_PRESSURE_HPA);
+        })();
+
+        // Test 33: Conversion factor
+        (function () {
+            test('METERS_PER_NM is 1852',
+                ATSEP_CONSTANTS.METERS_PER_NM === 1852, 1852, ATSEP_CONSTANTS.METERS_PER_NM);
+        })();
+
+        // ===============================================
+        // SUMMARY
+        // ===============================================
+
+        const total = passed + failed;
+        const percentage = ((passed / total) * 100).toFixed(1);
+
+        summaryDiv.className = 'summary ' + (failed === 0 ? 'all-pass' : 'has-failures');
+        summaryDiv.innerHTML = `
+            <strong>Test Results</strong><br>
+            <span class="pass-count">✓ ${passed} passed</span> / 
+            <span class="fail-count">✗ ${failed} failed</span> 
+            (${percentage}%)
+            <br><br>
+            ${failed === 0
+                ? '🎉 All tests passed!'
+                : '⚠️ Some tests failed. Please review the failures above.'}
+        `;
+
+        // Log to console for CI/automation
+        console.log(`\n=== ATSEP Toolbox Tests ===`);
+        console.log(`Passed: ${passed}/${total} (${percentage}%)`);
+        if (failed > 0) {
+            console.error(`Failed: ${failed} tests`);
+        }
+    </script>
+</body>
+
+</html>

@@ -4,150 +4,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATSEP Toolbox</title>
+    <title>ATSEP Toolbox - Aviation Tools for ATC Engineers</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="ATSEP Toolbox - Professional aviation tools for ATC Engineers. Calculate QNH corrections, geodesic distances, and bearings using Vincenty's algorithms. Works offline.">
+    <meta name="keywords"
+        content="ATC, ATSEP, aviation, QNH, geodesic, Vincenty, navigation, flight level, bearing, distance calculator">
+    <meta name="author" content="ATSEP Toolbox">
+    <link rel="canonical" href="https://arnaudamiel.github.io/ATSEP-Toolbox/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://arnaudamiel.github.io/ATSEP-Toolbox/">
+    <meta property="og:title" content="ATSEP Toolbox - Aviation Tools for ATC Engineers">
+    <meta property="og:description"
+        content="Calculate QNH corrections and geodesic measurements with professional accuracy. PWA - works offline.">
+    <meta property="og:image" content="https://arnaudamiel.github.io/ATSEP-Toolbox/icon-512.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="ATSEP Toolbox">
+    <meta name="twitter:description" content="Professional aviation tools for ATC Engineers">
+    <meta name="twitter:image" content="https://arnaudamiel.github.io/ATSEP-Toolbox/icon-512.png">
+
+    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a202c">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ATSEP">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- Fonts - Optimized loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <!-- Skip link for accessibility -->
+    <a href="#qnh-panel" class="visually-hidden focus-visible">Skip to main content</a>
 
-    <div class="calculator-card">
-        <div class="tab-nav">
-            <button class="tab-btn active" data-tab="qnh-panel">QNH</button>
-            <button class="tab-btn" data-tab="range-panel">RANGE</button>
-            <button class="tab-btn" data-tab="dest-panel">DEST</button>
-        </div>
+    <main>
+        <div class="calculator-card">
+            <nav class="tab-nav" role="tablist" aria-label="Calculator tools">
+                <button class="tab-btn active" data-tab="qnh-panel" role="tab" aria-selected="true"
+                    aria-controls="qnh-panel">QNH</button>
+                <button class="tab-btn" data-tab="range-panel" role="tab" aria-selected="false"
+                    aria-controls="range-panel">RANGE</button>
+                <button class="tab-btn" data-tab="dest-panel" role="tab" aria-selected="false"
+                    aria-controls="dest-panel">DEST</button>
+            </nav>
 
-        <!-- Global Settings (Hidden by default, used by JS) -->
-        <select id="coord_fmt" class="save-val" style="display:none">
-            <option value="DD">DD</option>
-            <option value="DDM">DDM</option>
-            <option value="DMS">DMS</option>
-        </select>
+            <!-- Global Settings (Hidden, used by JS) -->
+            <select id="coord_fmt" class="save-val hidden" aria-hidden="true">
+                <option value="DD">DD</option>
+                <option value="DDM">DDM</option>
+                <option value="DMS">DMS</option>
+            </select>
 
-        <!-- QNH Panel -->
-        <div id="qnh-panel" class="tab-panel active">
-            <h1 class="text-3xl font-bold mb-2 app-title">QNH Correction</h1>
+            <!-- QNH Panel -->
+            <section id="qnh-panel" class="tab-panel active" role="tabpanel" aria-labelledby="qnh-tab">
+                <h1 class="text-3xl font-bold mb-2 app-title">QNH Correction</h1>
 
-            <div class="mb-4 text-left">
-                <label for="pressureInput" class="block text-sm font-medium text-gray-300">Pressure Setting
-                    (QNH)</label>
-                <div class="flex items-center space-x-2">
-                    <input type="number" id="pressureInput" class="input-field flex-grow save-val"
-                        placeholder="e.g., 1005" inputmode="decimal" aria-label="Pressure value" required min="0">
-                    <select id="pressureUnit" class="input-field w-auto text-sm save-val"
-                        aria-label="Select pressure unit">
-                        <option value="hPa">hPa</option>
-                        <option value="inHg">inHg</option>
+                <div class="input-group">
+                    <label for="pressureInput" class="block text-sm font-medium text-gray-400">Pressure Setting
+                        (QNH)</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="number" id="pressureInput" class="input-field flex-grow save-val"
+                            placeholder="e.g., 1005" inputmode="decimal" aria-label="Pressure value" required min="0">
+                        <select id="pressureUnit" class="input-field w-auto text-sm save-val"
+                            aria-label="Select pressure unit">
+                            <option value="hPa">hPa</option>
+                            <option value="inHg">inHg</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="correctionUnit" class="block text-sm font-medium text-gray-400">Display Units</label>
+                    <select id="correctionUnit" class="input-field w-full text-sm save-val"
+                        aria-label="Select correction output unit">
+                        <option value="FL">FL (Flight Level)</option>
+                        <option value="feet">Feet</option>
+                        <option value="meters">Meters</option>
                     </select>
                 </div>
-            </div>
 
-            <div class="mb-4 text-left">
-                <label for="correctionUnit" class="block text-sm font-medium text-gray-300">Display Units</label>
-                <select id="correctionUnit" class="input-field w-full text-sm save-val"
-                    aria-label="Select correction output unit">
-                    <option value="FL">FL (Flight Level)</option>
-                    <option value="feet">Feet</option>
-                    <option value="meters">Meters</option>
-                </select>
-            </div>
+                <button id="calculateButton" type="button" class="calculate-btn w-full mt-6">Calculate
+                    Correction</button>
 
-            <button id="calculateButton" type="button" class="calculate-btn w-full mt-6">Calculate Correction</button>
+                <div id="resultDisplay" class="result-box mt-6" role="status" aria-live="polite">
+                    Enter pressure to get the correction.
+                </div>
+            </section>
 
-            <div id="resultDisplay" class="result-box mt-6" role="status" aria-live="polite">
-                Enter pressure to get the correction.
-            </div>
-        </div>
+            <!-- Range and Bearing Panel -->
+            <section id="range-panel" class="tab-panel" role="tabpanel" aria-labelledby="range-tab">
+                <h1 class="text-3xl font-bold mb-2 app-title">Range and Bearing Calculator</h1>
+                <div class="label-row">
+                    <span id="range-coords-label">Coordinates</span>
+                    <div>
+                        <label for="range_fmt_sel" class="visually-hidden">Coordinate format</label>
+                        <select id="range_fmt_sel" class="clean-select save-val">
+                            <option value="DD">DD</option>
+                            <option value="DDM">DDM</option>
+                            <option value="DMS">DMS</option>
+                        </select>
+                        <label for="range_unit_type" class="visually-hidden">Distance unit</label>
+                        <select id="range_unit_type" class="clean-select save-val">
+                            <option value="NM">NM</option>
+                            <option value="M">M</option>
+                        </select>
+                    </div>
+                </div>
 
-        <!-- Range and BearingPanel -->
-        <div id="range-panel" class="tab-panel">
-            <h1 class="text-3xl font-bold mb-2 app-title">Range and Bearing Calculator</h1>
-            <div class="label-row">
-                <span>Coordinates</span>
-                <div>
-                    <select id="range_fmt_sel" class="clean-select save-val">
+                <div id="r_origin_inputs" class="input-group mb-half" aria-labelledby="range-coords-label"></div>
+
+                <div class="swap-container">
+                    <button id="swapRangeBtn" class="swap-icon-btn" type="button" title="Swap Origin and Destination"
+                        aria-label="Swap origin and destination coordinates">
+                        <span aria-hidden="true">⇅</span>
+                    </button>
+                </div>
+
+                <div id="r_dest_inputs" class="input-group"></div>
+
+                <button class="calculate-btn" type="button">Calculate Vectors</button>
+
+                <div class="result-container">
+                    <button class="copy-btn" data-target="range_res" type="button"
+                        aria-label="Copy result to clipboard">📋</button>
+                    <div id="range_res" class="result-box" role="status" aria-live="polite">---</div>
+                </div>
+            </section>
+
+            <!-- Destination Panel -->
+            <section id="dest-panel" class="tab-panel" role="tabpanel" aria-labelledby="dest-tab">
+                <h1 class="text-3xl font-bold mb-2 app-title">Destination Calculator</h1>
+                <div class="label-row">
+                    <span id="dest-origin-label">Origin Point</span>
+                    <label for="dest_fmt_sel" class="visually-hidden">Coordinate format</label>
+                    <select id="dest_fmt_sel" class="clean-select save-val">
                         <option value="DD">DD</option>
                         <option value="DDM">DDM</option>
                         <option value="DMS">DMS</option>
                     </select>
-                    <select id="range_unit_type" class="clean-select save-val">
-                        <option value="NM">NM</option>
-                        <option value="M">M</option>
-                    </select>
                 </div>
-            </div>
 
-            <div id="r_origin_inputs" class="input-group" style="margin-bottom: 0.5rem;"></div>
+                <div id="d_start_inputs" class="input-group" aria-labelledby="dest-origin-label"></div>
 
-            <div class="swap-container">
-                <button id="swapRangeBtn" class="swap-icon-btn" type="button" title="Swap Origin and Destination"
-                    aria-label="Swap coordinates">
-                    ⇅
-                </button>
-            </div>
-
-            <div id="r_dest_inputs" class="input-group"></div>
-
-            <button class="calculate-btn">Calculate Vectors</button>
-
-            <div class="result-container">
-                <button class="copy-btn" data-target="range_res">📋</button>
-                <div id="range_res" class="result-box">---</div>
-            </div>
-        </div>
-
-        <!-- Destination Panel -->
-        <div id="dest-panel" class="tab-panel">
-            <h1 class="text-3xl font-bold mb-2 app-title">Destination Calculator</h1>
-            <div class="label-row">
-                <span>Origin Point</span>
-                <select id="dest_fmt_sel" class="clean-select save-val">
-                    <option value="DD">DD</option>
-                    <option value="DDM">DDM</option>
-                    <option value="DMS">DMS</option>
-                </select>
-            </div>
-
-            <div id="d_start_inputs" class="input-group"></div>
-
-            <div class="input-group">
-                <div class="label-row">
-                    <span>Vector Input</span>
-                    <select id="d_unit" class="clean-select save-val">
-                        <option value="NM">NM</option>
-                        <option value="M">M</option>
-                    </select>
-                </div>
-                <div class="input-row-responsive">
-                    <div style="flex:1">
-                        <small style="display:block; margin-bottom:4px; opacity:0.7;">Range</small>
-                        <input type="number" id="d_dist" class="num-input w-full save-val" placeholder="0.0"
-                            inputmode="decimal" min="0" step="any">
+                <div class="input-group">
+                    <div class="label-row">
+                        <span id="vector-input-label">Vector Input</span>
+                        <label for="d_unit" class="visually-hidden">Distance unit</label>
+                        <select id="d_unit" class="clean-select save-val">
+                            <option value="NM">NM</option>
+                            <option value="M">M</option>
+                        </select>
                     </div>
-                    <div style="flex:1">
-                        <small style="display:block; margin-bottom:4px; opacity:0.7;">Bearing (°T)</small>
-                        <input type="number" id="d_brng" class="num-input w-full save-val" placeholder="360"
-                            inputmode="decimal" min="0" max="360" step="any">
+                    <div class="input-row-responsive">
+                        <div class="flex-1">
+                            <label for="d_dist" class="small-label">Range</label>
+                            <input type="number" id="d_dist" class="num-input w-full save-val" placeholder="0.0"
+                                inputmode="decimal" min="0" step="any">
+                        </div>
+                        <div class="flex-1">
+                            <label for="d_brng" class="small-label">Bearing (°T)</label>
+                            <input type="number" id="d_brng" class="num-input w-full save-val" placeholder="360"
+                                inputmode="decimal" min="0" max="360" step="any">
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <button class="calculate-btn">Project Destination</button>
+                <button class="calculate-btn" type="button">Project Destination</button>
 
-            <div class="result-container">
-                <button class="copy-btn" data-target="dest_res">📋</button>
-                <div id="dest_res" class="result-box">---</div>
-            </div>
+                <div class="result-container">
+                    <button class="copy-btn" data-target="dest_res" type="button"
+                        aria-label="Copy result to clipboard">📋</button>
+                    <div id="dest_res" class="result-box" role="status" aria-live="polite">---</div>
+                </div>
+            </section>
+
+            <div class="ducky-mascot" title="Ducky: Ducky is here to help! Quack!" aria-hidden="true">🦆</div>
         </div>
+    </main>
 
-        <div class="ducky-mascot" title="Ducky: Ducky is here to help! Quack!">🦆</div>
-    </div>
+    <!-- Shared Constants (must load first) -->
+    <script src="constants.js"></script>
 
     <!-- Computation Modules -->
-    <script src="Vicenty.js"></script>
+    <script src="Vincenty.js"></script>
     <script src="QNH.js"></script>
 
     <!-- Application Logic -->

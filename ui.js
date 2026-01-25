@@ -1,31 +1,114 @@
 /**
  * UI Controller for ATSEP Toolbox
- * Centralizes DOM manipulation, event listeners, and input validation.
+ * 
+ * Centralizes DOM manipulation, event listeners, input validation,
+ * and user interaction handling. All computation logic is delegated
+ * to the QNH and Vincenty modules.
+ * 
+ * @module UI
+ * @author ATSEP Toolbox
  */
 
 const UI = (function () {
 
     // --- Module Scoped Constants ---
-    const STORAGE_KEYS = {
-        ACTIVE_TAB: 'active_tab',
-        COORD_FMT: 'coord_fmt',
-        RANGE_UNIT: 'range_unit_type',
-        DEST_UNIT: 'd_unit'
-    };
 
-    const INHG_TO_HPA = 33.86389; // Standard conversion factor
+    /** Debounce delay for input saving in milliseconds */
+    const DEBOUNCE_DELAY_MS = (typeof ATSEP_CONSTANTS !== 'undefined')
+        ? ATSEP_CONSTANTS.DEBOUNCE_DELAY_MS : 300;
 
-    const CONVERSION_FACTORS = {
-        INHG_TO_HPA: INHG_TO_HPA,
-        HPA_TO_INHG: 1 / INHG_TO_HPA,
-        METERS_PER_NM: 1852
-    };
+    /** Easter egg reveal delay in milliseconds */
+    const EASTER_EGG_DELAY_MS = (typeof ATSEP_CONSTANTS !== 'undefined')
+        ? ATSEP_CONSTANTS.EASTER_EGG_DELAY_MS : 10000;
+
+    /** Conversion factors - use shared constants if available */
+    const INHG_TO_HPA = (typeof ATSEP_CONSTANTS !== 'undefined')
+        ? ATSEP_CONSTANTS.INHG_TO_HPA : 33.86389;
+    const HPA_TO_INHG = (typeof ATSEP_CONSTANTS !== 'undefined')
+        ? ATSEP_CONSTANTS.HPA_TO_INHG : 1 / 33.86389;
+    const METERS_PER_NM = (typeof ATSEP_CONSTANTS !== 'undefined')
+        ? ATSEP_CONSTANTS.METERS_PER_NM : 1852;
+
+    /** Storage keys for localStorage */
+    const STORAGE_KEYS = (typeof window.STORAGE_KEYS !== 'undefined')
+        ? window.STORAGE_KEYS
+        : {
+            ACTIVE_TAB: 'active_tab',
+            COORD_FMT: 'coord_fmt',
+            RANGE_UNIT: 'range_unit_type',
+            DEST_UNIT: 'd_unit'
+        };
+
+    // --- Safe Storage Wrapper ---
 
     /**
-     * Initialize the UI Controller
+     * Safe wrapper for localStorage operations.
+     * Handles cases where localStorage is unavailable (e.g., private browsing mode).
+     * @namespace
+     */
+    const SafeStorage = {
+        /** Flag indicating if localStorage is available */
+        _available: null,
+
+        /**
+         * Checks if localStorage is available
+         * @returns {boolean} True if localStorage is available
+         */
+        isAvailable() {
+            if (this._available !== null) return this._available;
+            try {
+                const testKey = '__storage_test__';
+                localStorage.setItem(testKey, testKey);
+                localStorage.removeItem(testKey);
+                this._available = true;
+            } catch (e) {
+                this._available = false;
+                console.warn('localStorage is unavailable. Settings will not persist.');
+            }
+            return this._available;
+        },
+
+        /**
+         * Safely retrieves an item from localStorage
+         * @param {string} key - The key to retrieve
+         * @returns {string|null} The stored value or null
+         */
+        getItem(key) {
+            if (!this.isAvailable()) return null;
+            try {
+                return localStorage.getItem(key);
+            } catch (e) {
+                console.warn('localStorage read failed:', e);
+                return null;
+            }
+        },
+
+        /**
+         * Safely stores an item in localStorage
+         * @param {string} key - The key to store
+         * @param {string} value - The value to store
+         */
+        setItem(key, value) {
+            if (!this.isAvailable()) return;
+            try {
+                localStorage.setItem(key, value);
+            } catch (e) {
+                console.warn('localStorage write failed:', e);
+            }
+        }
+    };
+
+    // --- Cached DOM Elements ---
+
+    /** Cached references to frequently accessed DOM elements */
+    let elements = {};
+
+    /**
+     * Initialize the UI Controller.
+     * This is the main entry point called on DOMContentLoaded.
      */
     function init() {
-        console.log('UI Controller Initializing...');
+        _cacheElements();
         _attachGlobalListeners();
         _inputRestoration();
         _initTabs();
@@ -33,6 +116,33 @@ const UI = (function () {
         _initEasterEgg();
     }
 
+    /**
+     * Cache frequently accessed DOM elements to avoid repeated queries.
+     * @private
+     */
+    function _cacheElements() {
+        elements = {
+            coordFmt: document.getElementById('coord_fmt'),
+            rangeFmtSel: document.getElementById('range_fmt_sel'),
+            destFmtSel: document.getElementById('dest_fmt_sel'),
+            pressureInput: document.getElementById('pressureInput'),
+            pressureUnit: document.getElementById('pressureUnit'),
+            correctionUnit: document.getElementById('correctionUnit'),
+            resultDisplay: document.getElementById('resultDisplay'),
+            rangeRes: document.getElementById('range_res'),
+            destRes: document.getElementById('dest_res'),
+            rangeUnitType: document.getElementById('range_unit_type'),
+            destUnit: document.getElementById('d_unit'),
+            distInput: document.getElementById('d_dist'),
+            brngInput: document.getElementById('d_brng')
+        };
+    }
+
+    /**
+     * Initialize the Easter egg feature.
+     * The ducky mascot appears after holding the title for a set duration.
+     * @private
+     */
     function _initEasterEgg() {
         const titles = document.querySelectorAll('.app-title');
         const ducky = document.querySelector('.ducky-mascot');
@@ -41,7 +151,7 @@ const UI = (function () {
         const start = () => {
             timer = setTimeout(() => {
                 if (ducky) ducky.classList.add('visible');
-            }, 10000); // 10 seconds
+            }, EASTER_EGG_DELAY_MS);
         };
 
         const cancel = () => {
@@ -58,8 +168,9 @@ const UI = (function () {
     }
 
     /**
-     * Attach all event listeners here.
-     * Removes the need for onclick/onchange in HTML.
+     * Attach all event listeners.
+     * Centralizes event binding - no onclick/onchange needed in HTML.
+     * @private
      */
     function _attachGlobalListeners() {
         // Tab Navigation
@@ -85,14 +196,14 @@ const UI = (function () {
         const swapBtn = document.getElementById('swapRangeBtn');
         if (swapBtn) swapBtn.addEventListener('click', _swapRangeInputs);
 
-        // Input Savings (Auto-save) for non-coordinate inputs
+        // Input Savings (Auto-save) with debouncing
         document.addEventListener('input', (e) => {
             if (e.target.classList.contains('save-val') && e.target.id) {
                 const el = e.target;
                 if (el.saveTimeout) clearTimeout(el.saveTimeout);
                 el.saveTimeout = setTimeout(() => {
-                    localStorage.setItem(el.id, el.value);
-                }, 300);
+                    SafeStorage.setItem(el.id, el.value);
+                }, DEBOUNCE_DELAY_MS);
             }
         });
 
@@ -100,9 +211,8 @@ const UI = (function () {
         const qnhBtn = document.getElementById('calculateButton');
         if (qnhBtn) qnhBtn.addEventListener('click', _calculateQnhCorrectionUI);
 
-        const pressureInput = document.getElementById('pressureInput');
-        if (pressureInput) {
-            pressureInput.addEventListener('keydown', (e) => {
+        if (elements.pressureInput) {
+            elements.pressureInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     _calculateQnhCorrectionUI();
@@ -110,15 +220,13 @@ const UI = (function () {
             });
         }
 
-        const pressureUnit = document.getElementById('pressureUnit');
-        if (pressureUnit) {
-            pressureUnit.dataset.prev = pressureUnit.value;
-            pressureUnit.addEventListener('change', _handlePressureUnitChange);
-            _updatePressureInputAttributes(); // Run once on init
+        if (elements.pressureUnit) {
+            elements.pressureUnit.dataset.prev = elements.pressureUnit.value;
+            elements.pressureUnit.addEventListener('change', _handlePressureUnitChange);
+            _updatePressureInputAttributes();
         }
 
-
-        // Vicenty Module Listeners
+        // Vincenty Module Listeners
         const rangeBtn = document.querySelector('#range-panel .calculate-btn');
         if (rangeBtn) rangeBtn.addEventListener('click', _runRange);
 
@@ -136,13 +244,21 @@ const UI = (function () {
 
     // --- Tab Logic ---
 
+    /**
+     * Initialize tab state from saved preference or default.
+     * @private
+     */
     function _initTabs() {
-        const lastTabId = localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) || 'qnh-panel';
-        // Find button for this tab
+        const lastTabId = SafeStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) || 'qnh-panel';
         const btn = document.querySelector(`.tab-btn[data-tab="${lastTabId}"]`) || document.querySelector('.tab-btn');
         if (btn) _switchTab(btn);
     }
 
+    /**
+     * Switches the active tab in the UI.
+     * @param {HTMLElement} targetBtn - The tab button that was clicked
+     * @private
+     */
     function _switchTab(targetBtn) {
         // Deactivate all
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -154,40 +270,58 @@ const UI = (function () {
         const panel = document.getElementById(panelId);
         if (panel) panel.classList.add('active');
 
-        localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, panelId);
+        SafeStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, panelId);
     }
 
     // --- Input & State Management ---
 
+    /**
+     * Restore saved input values from localStorage.
+     * @private
+     */
     function _inputRestoration() {
         document.querySelectorAll('.save-val').forEach(el => {
-            const saved = localStorage.getItem(el.id);
+            const saved = SafeStorage.getItem(el.id);
             if (saved !== null) el.value = saved;
         });
-        // Coords are handled separately now
     }
 
+    /**
+     * Update coordinate format across all selectors.
+     * @param {string} val - The format value ('DD', 'DDM', 'DMS')
+     * @private
+     */
     function _updateFmt(val) {
         // Sync all selectors
         document.querySelectorAll('#coord_fmt, #range_fmt_sel, #dest_fmt_sel').forEach(el => {
             el.value = val;
         });
 
-        localStorage.setItem(STORAGE_KEYS.COORD_FMT, val);
-        localStorage.setItem('range_fmt_sel', val);
-        localStorage.setItem('dest_fmt_sel', val);
+        SafeStorage.setItem(STORAGE_KEYS.COORD_FMT, val);
+        SafeStorage.setItem('range_fmt_sel', val);
+        SafeStorage.setItem('dest_fmt_sel', val);
 
         _updateDependentUI();
     }
 
+    /**
+     * Update distance unit across all selectors.
+     * @param {string} val - The unit value ('NM' or 'M')
+     * @private
+     */
     function _updateDistUnit(val) {
         document.querySelectorAll('#range_unit_type, #d_unit').forEach(el => {
             el.value = val;
         });
-        localStorage.setItem(STORAGE_KEYS.RANGE_UNIT, val);
-        localStorage.setItem(STORAGE_KEYS.DEST_UNIT, val);
+        SafeStorage.setItem(STORAGE_KEYS.RANGE_UNIT, val);
+        SafeStorage.setItem(STORAGE_KEYS.DEST_UNIT, val);
     }
 
+    /**
+     * Update UI elements that depend on format/unit settings.
+     * Re-renders coordinate input fields based on current format.
+     * @private
+     */
     function _updateDependentUI() {
         // Re-render coordinate inputs based on format
         ['r_origin', 'r_dest', 'd_start'].forEach(prefix => {
@@ -207,12 +341,21 @@ const UI = (function () {
         _inputRestoration();
     }
 
+    /**
+     * Creates HTML for a coordinate input row.
+     * @param {string} prefix - Input group prefix (e.g., 'r_origin', 'd_start')
+     * @param {string} type - Coordinate type ('lat' or 'lon')
+     * @returns {string} HTML string for the coordinate row
+     * @private
+     */
     function _createCoordRow(prefix, type) {
-        const fmt = document.getElementById('coord_fmt').value || 'DD';
-        let html = `<div class="coord-row" data-prefix="${prefix}" data-type="${type}">`;
+        const fmt = (elements.coordFmt ? elements.coordFmt.value : null) || 'DD';
+        const labelPrefix = type === 'lat' ? 'Latitude' : 'Longitude';
+        let html = `<div class="coord-row" data-prefix="${prefix}" data-type="${type}" role="group" aria-label="${labelPrefix} input">`;
 
         // Hemisphere Select
-        html += `<select class="hem-select coord-input" data-part="h">`;
+        const hemLabel = type === 'lat' ? 'Latitude hemisphere' : 'Longitude hemisphere';
+        html += `<select class="hem-select coord-input" data-part="h" aria-label="${hemLabel}">`;
         if (type === 'lat') html += `<option value="1">N</option><option value="-1">S</option>`;
         else html += `<option value="1">E</option><option value="-1">W</option>`;
         html += `</select>`;
@@ -222,35 +365,39 @@ const UI = (function () {
         const maxDeg = isLat ? 90 : 180;
 
         // Helper for input attributes
-        const getAttrs = (part, max, step) => {
+        const getAttrs = (part, max, step, label) => {
             return `type="number" class="num-input coord-input" data-part="${part}" 
-                    inputmode="decimal" min="0" max="${max}" step="${step}"`;
+                    inputmode="decimal" min="0" max="${max}" step="${step}" aria-label="${label}"`;
         };
 
         // Degrees
         const dStep = (fmt === 'DD') ? "any" : "1";
-        // For DD, max is maxDeg. For DMS/DDM, technically maxDeg too (e.g. 90deg 0min). 
-        // Validation should allow 90 if others are 0, but HTML max=90 works.
-        html += `<input ${getAttrs('d', maxDeg, dStep)} placeholder="°">`;
+        const degLabel = `${labelPrefix} degrees`;
+        html += `<input ${getAttrs('d', maxDeg, dStep, degLabel)} placeholder="°">`;
 
         // Minutes
         if (fmt !== 'DD') {
             const mStep = (fmt === 'DDM') ? "any" : "1";
-            // Minutes max is always < 60 (except if degrees < max? No, standard is 0-59).
-            // Let's use 60 as max for safety, but step suggests integer vs decimal
-            html += `<input ${getAttrs('m', 60, mStep)} placeholder="'">`;
+            const minLabel = `${labelPrefix} minutes`;
+            html += `<input ${getAttrs('m', 60, mStep, minLabel)} placeholder="'">`;
         }
 
         // Seconds
         if (fmt === 'DMS') {
             const sStep = "any";
-            html += `<input ${getAttrs('s', 60, sStep)} placeholder="''">`;
+            const secLabel = `${labelPrefix} seconds`;
+            html += `<input ${getAttrs('s', 60, sStep, secLabel)} placeholder="''">`;
         }
 
         html += `</div>`;
         return html;
     }
 
+    /**
+     * Copies result text to clipboard.
+     * @param {string} elementId - ID of the element containing text to copy
+     * @private
+     */
     function _copyResult(elementId) {
         const el = document.getElementById(elementId);
         if (el) {
@@ -259,13 +406,17 @@ const UI = (function () {
         }
     }
 
-    // --- Logic: Coordinate Management ---
+    // --- Coordinate Management ---
 
+    /**
+     * Attach event listeners to coordinate input fields.
+     * @private
+     */
     function _attachCoordListeners() {
         document.querySelectorAll('.coord-input').forEach(input => {
             // Avoid double binding
             if (input.dataset.bound) return;
-            input.dataset.bound = true;
+            input.dataset.bound = 'true';
 
             input.addEventListener('input', _handleCoordInput);
 
@@ -276,14 +427,20 @@ const UI = (function () {
         });
     }
 
+    /**
+     * Handles paste events on degree inputs.
+     * Supports pasting decimal degrees with automatic hemisphere detection.
+     * @param {ClipboardEvent} e - The paste event
+     * @private
+     */
     function _handlePaste(e) {
         e.preventDefault();
         const text = (e.clipboardData || window.clipboardData).getData('text');
         if (!text) return;
 
         const row = e.target.closest('.coord-row');
-        const prefix = row.dataset.prefix; // e.g., r_origin
-        const type = row.dataset.type;     // e.g., lat
+        const prefix = row.dataset.prefix;
+        const type = row.dataset.type;
 
         let val = parseFloat(text);
         if (isNaN(val)) return;
@@ -302,6 +459,12 @@ const UI = (function () {
         _saveCoordsToStorage(prefix, type);
     }
 
+    /**
+     * Handles input changes on coordinate fields.
+     * Debounces saving to reduce disk I/O.
+     * @param {Event} e - The input event
+     * @private
+     */
     function _handleCoordInput(e) {
         const row = e.target.closest('.coord-row');
         if (!row) return;
@@ -312,9 +475,16 @@ const UI = (function () {
         if (el.coordTimeout) clearTimeout(el.coordTimeout);
         el.coordTimeout = setTimeout(() => {
             _saveCoordsToStorage(prefix, type);
-        }, 300);
+        }, DEBOUNCE_DELAY_MS);
     }
 
+    /**
+     * Saves coordinate values to localStorage as decimal degrees.
+     * Converts from current format (DD/DDM/DMS) to DD for storage.
+     * @param {string} prefix - Input group prefix
+     * @param {string} type - Coordinate type ('lat' or 'lon')
+     * @private
+     */
     function _saveCoordsToStorage(prefix, type) {
         const row = document.querySelector(`.coord-row[data-prefix="${prefix}"][data-type="${type}"]`);
         if (!row) return;
@@ -330,17 +500,24 @@ const UI = (function () {
         const s = getVal('s');
 
         const dd = h * (d + m / 60 + s / 3600);
-        localStorage.setItem(`${prefix}_${type}_dd`, dd);
+        SafeStorage.setItem(`${prefix}_${type}_dd`, dd);
     }
 
+    /**
+     * Loads coordinate values from localStorage and populates input fields.
+     * Converts from stored DD to current display format (DD/DDM/DMS).
+     * @param {string} prefix - Input group prefix
+     * @param {string} type - Coordinate type ('lat' or 'lon')
+     * @private
+     */
     function _loadCoordsFromStorage(prefix, type) {
-        const ddVal = parseFloat(localStorage.getItem(`${prefix}_${type}_dd`));
-        if (isNaN(ddVal)) return; // No saved data
+        const ddVal = parseFloat(SafeStorage.getItem(`${prefix}_${type}_dd`));
+        if (isNaN(ddVal)) return;
 
         const row = document.querySelector(`.coord-row[data-prefix="${prefix}"][data-type="${type}"]`);
         if (!row) return;
 
-        const fmt = document.getElementById('coord_fmt').value || 'DD';
+        const fmt = (elements.coordFmt ? elements.coordFmt.value : null) || 'DD';
         const absVal = Math.abs(ddVal);
         const sign = ddVal < 0 ? -1 : 1;
 
@@ -352,8 +529,7 @@ const UI = (function () {
         let d, m = 0, s = 0;
 
         if (fmt === 'DD') {
-            d = absVal; // Keep high precision? 
-            // Display might limit decimals, but value should be exact
+            d = absVal;
         } else if (fmt === 'DDM') {
             d = Math.floor(absVal);
             m = (absVal - d) * 60;
@@ -364,16 +540,13 @@ const UI = (function () {
             s = (mFull - m) * 60;
         }
 
-        // Set inputs
+        // Set inputs with appropriate precision
         const setVal = (part, val) => {
             const el = row.querySelector(`[data-part="${part}"]`);
-            // Format to reasonable decimals to avoid floating point ugliness
-            // DD: 6, DDM: 4, DMS: 2
             let displayVal = val;
             if (part === 'd' && fmt === 'DD') displayVal = parseFloat(val.toFixed(6));
             if (part === 'm') displayVal = parseFloat(val.toFixed(4));
             if (part === 's') displayVal = parseFloat(val.toFixed(2));
-
             if (el) el.value = displayVal;
         };
 
@@ -382,39 +555,48 @@ const UI = (function () {
         setVal('s', s);
     }
 
+    /**
+     * Swaps the origin and destination coordinates in the Range panel.
+     * @private
+     */
     function _swapRangeInputs() {
-        const p1Lat = localStorage.getItem('r_origin_lat_dd');
-        const p1Lon = localStorage.getItem('r_origin_lon_dd');
-        const p2Lat = localStorage.getItem('r_dest_lat_dd');
-        const p2Lon = localStorage.getItem('r_dest_lon_dd');
+        const p1Lat = SafeStorage.getItem('r_origin_lat_dd');
+        const p1Lon = SafeStorage.getItem('r_origin_lon_dd');
+        const p2Lat = SafeStorage.getItem('r_dest_lat_dd');
+        const p2Lon = SafeStorage.getItem('r_dest_lon_dd');
 
-        localStorage.setItem('r_origin_lat_dd', p2Lat || 0);
-        localStorage.setItem('r_origin_lon_dd', p2Lon || 0);
-        localStorage.setItem('r_dest_lat_dd', p1Lat || 0);
-        localStorage.setItem('r_dest_lon_dd', p1Lon || 0);
+        SafeStorage.setItem('r_origin_lat_dd', p2Lat || 0);
+        SafeStorage.setItem('r_origin_lon_dd', p2Lon || 0);
+        SafeStorage.setItem('r_dest_lat_dd', p1Lat || 0);
+        SafeStorage.setItem('r_dest_lon_dd', p1Lon || 0);
 
         // Reload UI
         _updateDependentUI();
     }
 
-    // --- Logic: QNH ---
+    // --- QNH Logic ---
 
+    /**
+     * Handles pressure unit change with value conversion.
+     * @param {Event} e - The change event
+     * @private
+     */
     function _handlePressureUnitChange(e) {
         const el = e.target;
         const newUnit = el.value;
         const oldUnit = el.dataset.prev;
-        const input = document.getElementById('pressureInput');
+        const input = elements.pressureInput;
 
         if (input.value && oldUnit && newUnit !== oldUnit) {
             let val = parseFloat(input.value);
             if (!isNaN(val)) {
                 if (newUnit === 'inHg' && oldUnit === 'hPa') {
                     // hPa -> inHg
-                    val = val * CONVERSION_FACTORS.HPA_TO_INHG;
+                    val = val * HPA_TO_INHG;
                     input.value = val.toFixed(2);
                 } else if (newUnit === 'hPa' && oldUnit === 'inHg') {
                     // inHg -> hPa
-                    val = val * CONVERSION_FACTORS.INHG_TO_HPA;
+                    val = val * INHG_TO_HPA;
                     input.value = Math.round(val);
                 }
             }
@@ -424,9 +606,15 @@ const UI = (function () {
         _updatePressureInputAttributes();
     }
 
+    /**
+     * Updates pressure input attributes based on selected unit.
+     * @private
+     */
     function _updatePressureInputAttributes() {
-        const unit = document.getElementById('pressureUnit').value;
-        const input = document.getElementById('pressureInput');
+        const unit = elements.pressureUnit ? elements.pressureUnit.value : 'hPa';
+        const input = elements.pressureInput;
+        if (!input) return;
+
         if (unit === 'inHg') {
             input.step = "0.01";
             input.placeholder = "e.g., 29.92";
@@ -436,17 +624,27 @@ const UI = (function () {
         }
     }
 
+    /**
+     * Calculates and displays QNH correction.
+     * Handles UI feedback including errors and warnings.
+     * @private
+     */
     function _calculateQnhCorrectionUI() {
-        const inputRaw = parseFloat(document.getElementById('pressureInput').value);
-        const pUnit = document.getElementById('pressureUnit').value;
-        const outUnit = document.getElementById('correctionUnit').value;
-        const display = document.getElementById('resultDisplay');
+        const inputRaw = parseFloat(elements.pressureInput ? elements.pressureInput.value : 0);
+        const pUnit = elements.pressureUnit ? elements.pressureUnit.value : 'hPa';
+        const outUnit = elements.correctionUnit ? elements.correctionUnit.value : 'feet';
+        const display = elements.resultDisplay;
+
+        if (!display) return;
 
         display.innerHTML = '';
         display.removeAttribute('data-warning');
 
         if (isNaN(inputRaw) || inputRaw <= 0) {
-            display.innerHTML = '<span class="result-error">Please enter a valid positive pressure value.</span>';
+            const msg = (typeof ERROR_MESSAGES !== 'undefined')
+                ? ERROR_MESSAGES.INVALID_PRESSURE
+                : 'Please enter a valid positive pressure value.';
+            display.innerHTML = `<span class="result-error">${msg}</span>`;
             return;
         }
 
@@ -466,26 +664,30 @@ const UI = (function () {
         const colorClass = res.correction > 0 ? 'result-positive' : (res.correction < 0 ? 'result-negative' : '');
         const prefix = res.correction > 0 ? '+' : '';
 
-        // Format: Pressure Altitude: 360 ft (Correction: -360 ft)
         html += `<span class="pa-value" style="display:block; margin-bottom: 4px;">Pressure Altitude: ${res.pressureAltitude} ${res.unit}</span>`;
         html += `<span class="correction-value ${colorClass}" style="opacity: 0.9; font-size: 0.9em;">(Correction: ${prefix}${res.correction} ${res.unit})</span>`;
 
         display.innerHTML = html;
     }
 
-    // --- Logic: Vicenty Helpers ---
+    // --- Vincenty Helpers ---
 
+    /**
+     * Validates coordinate inputs and returns decimal degrees.
+     * @param {string} prefix - The input group prefix (e.g., 'r_origin', 'd_start')
+     * @param {string} errorContainerId - ID of the element to display errors
+     * @returns {Object|null} Object with lat/lon properties, or null if validation fails
+     * @private
+     */
     function _validateAndGetCoords(prefix, errorContainerId) {
         const getDD = (type, max, name) => {
-            const val = parseFloat(localStorage.getItem(`${prefix}_${type}_dd`));
+            const val = parseFloat(SafeStorage.getItem(`${prefix}_${type}_dd`));
 
-            // Check for NaN (should be handled by save logic, but good safety)
             if (isNaN(val)) {
                 return { err: `${name}: Invalid number` };
             }
-            // Simple range check
             if (Math.abs(val) > max) {
-                return { err: `${name}: Must be <= ${max}°` };
+                return { err: `${name}: Must be ≤ ${max}°` };
             }
             return { val };
         };
@@ -503,8 +705,15 @@ const UI = (function () {
         return { lat: latObj.val, lon: lonObj.val };
     }
 
+    /**
+     * Formats coordinates for display based on current format setting.
+     * @param {number} lat - Latitude in decimal degrees
+     * @param {number} lon - Longitude in decimal degrees
+     * @returns {string} HTML string with formatted coordinates
+     * @private
+     */
     function _formatCoords(lat, lon) {
-        const fmt = document.getElementById('coord_fmt').value;
+        const fmt = elements.coordFmt ? elements.coordFmt.value : 'DD';
 
         const formatSingle = (val, isLat) => {
             const abs = Math.abs(val);
@@ -514,19 +723,23 @@ const UI = (function () {
             if (fmt === 'DD') return `${hemi} ${abs.toFixed(5)}°`;
 
             const minFull = (abs - deg) * 60;
-            if (fmt === 'DDM') return `${hemi} ${deg}° ${minFull.toFixed(5)}'`;
+            if (fmt === 'DDM') return `${hemi} ${deg}° ${minFull.toFixed(4)}'`;
 
             const min = Math.floor(minFull);
             const sec = ((minFull - min) * 60).toFixed(2);
             return `${hemi} ${deg}° ${min}' ${sec}"`;
         };
 
-        // Return HTML with wrappers to control line breaking
         return `<span class="coord-val">${formatSingle(lat, true)}</span><span class="coord-val">${formatSingle(lon, false)}</span>`;
     }
 
-    // --- Logic: Vicenty Calculation ---
+    // --- Vincenty Calculation ---
 
+    /**
+     * Runs the Range (inverse) calculation.
+     * Calculates distance and bearing between two points.
+     * @private
+     */
     function _runRange() {
         const p1 = _validateAndGetCoords('r_origin', 'range_res');
         const p2 = _validateAndGetCoords('r_dest', 'range_res');
@@ -534,55 +747,68 @@ const UI = (function () {
         if (!p1 || !p2) return;
 
         try {
-            const res = Vicenty.calculateDistance(p1.lat, p1.lon, p2.lat, p2.lon);
-            const unit = document.getElementById('range_unit_type').value;
+            const res = Vincenty.calculateDistance(p1.lat, p1.lon, p2.lat, p2.lon);
+            const unit = elements.rangeUnitType ? elements.rangeUnitType.value : 'NM';
 
             let distDisplay = res.distance;
-            if (unit === 'NM') distDisplay = res.distance / CONVERSION_FACTORS.METERS_PER_NM;
+            if (unit === 'NM') distDisplay = res.distance / METERS_PER_NM;
 
             const html = `
                 <div class="result-row"><span class="label">Range:</span> <span class="val">${distDisplay.toFixed(2)} ${unit}</span></div>
                 <div class="result-row"><span class="label">Bearing:</span> <span class="val">${Math.round(res.initialBearing)}° (T)</span></div>
             `;
-            document.getElementById('range_res').innerHTML = html;
+            elements.rangeRes.innerHTML = html;
         } catch (e) {
-            document.getElementById('range_res').innerHTML = `<span class="result-error">Error: ${e.message}</span>`;
+            elements.rangeRes.innerHTML = `<span class="result-error">Error: ${e.message}</span>`;
         }
     }
 
+    /**
+     * Runs the Destination (direct) calculation.
+     * Projects a point given start, distance, and bearing.
+     * @private
+     */
     function _runDest() {
         const start = _validateAndGetCoords('d_start', 'dest_res');
         if (!start) return;
 
-        const distEl = document.getElementById('d_dist');
-        const brngEl = document.getElementById('d_brng');
+        const distEl = elements.distInput;
+        const brngEl = elements.brngInput;
+
+        if (!distEl || !brngEl) return;
 
         const dist = parseFloat(distEl.value);
         const brng = parseFloat(brngEl.value);
 
         if (isNaN(dist) || isNaN(brng)) {
-            document.getElementById('dest_res').innerHTML = '<span class="result-error">Invalid Range or Bearing</span>';
+            elements.destRes.innerHTML = '<span class="result-error">Invalid Range or Bearing</span>';
             return;
         }
 
         if (dist < 0) {
-            document.getElementById('dest_res').innerHTML = '<span class="result-error">Range cannot be negative</span>';
+            const msg = (typeof ERROR_MESSAGES !== 'undefined')
+                ? ERROR_MESSAGES.NEGATIVE_RANGE
+                : 'Range cannot be negative';
+            elements.destRes.innerHTML = `<span class="result-error">${msg}</span>`;
             return;
         }
 
         if (brng < -360 || brng > 360) {
-            document.getElementById('dest_res').innerHTML = '<span class="result-error">Bearing must be between -360 and 360</span>';
+            const msg = (typeof ERROR_MESSAGES !== 'undefined')
+                ? ERROR_MESSAGES.INVALID_BEARING
+                : 'Bearing must be between -360° and +360°';
+            elements.destRes.innerHTML = `<span class="result-error">${msg}</span>`;
             return;
         }
 
-        const unit = document.getElementById('d_unit').value;
-        const distMeters = (unit === 'NM') ? dist * CONVERSION_FACTORS.METERS_PER_NM : dist;
+        const unit = elements.destUnit ? elements.destUnit.value : 'NM';
+        const distMeters = (unit === 'NM') ? dist * METERS_PER_NM : dist;
 
         try {
-            const dest = Vicenty.calculateDestination(start.lat, start.lon, distMeters, brng);
-            document.getElementById('dest_res').innerHTML = `<span class="result-success">${_formatCoords(dest.lat, dest.lon)}</span>`;
+            const dest = Vincenty.calculateDestination(start.lat, start.lon, distMeters, brng);
+            elements.destRes.innerHTML = `<span class="result-success">${_formatCoords(dest.lat, dest.lon)}</span>`;
         } catch (e) {
-            document.getElementById('dest_res').innerHTML = `<span class="result-error">Error: ${e.message}</span>`;
+            elements.destRes.innerHTML = `<span class="result-error">Error: ${e.message}</span>`;
         }
     }
 
@@ -593,5 +819,5 @@ const UI = (function () {
 
 })();
 
-// Auto-start
+// Auto-start on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', UI.init);

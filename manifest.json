@@ -1,22 +1,49 @@
 {
     "name": "ATSEP Toolbox",
     "short_name": "ATSEP",
+    "description": "Professional aviation toolbox for ATC Engineers with QNH corrections and geodesic calculations using Vincenty's algorithms on WGS-84.",
     "start_url": "./index.html",
+    "scope": "./",
     "display": "standalone",
     "background_color": "#1a202c",
     "theme_color": "#1a202c",
-    "description": "Toolbox for ATC engineers.",
+    "lang": "en",
+    "dir": "ltr",
+    "categories": ["utilities", "navigation", "productivity"],
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
     "icons": [
         {
             "src": "icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ],
-    "orientation": "portrait"
+    "shortcuts": [
+        {
+            "name": "QNH Calculator",
+            "short_name": "QNH",
+            "description": "Calculate QNH altitude corrections",
+            "url": "./index.html#qnh-panel"
+        },
+        {
+            "name": "Range Calculator",
+            "short_name": "Range",
+            "description": "Calculate distance and bearing between points",
+            "url": "./index.html#range-panel"
+        },
+        {
+            "name": "Destination Calculator",
+            "short_name": "Dest",
+            "description": "Project destination from point, distance, and bearing",
+            "url": "./index.html#dest-panel"
+        }
+    ]
 }

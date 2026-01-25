@@ -1,36 +1,105 @@
+/**
+ * ATSEP Toolbox Styles
+ * 
+ * Design system for the ATSEP aviation toolbox application.
+ * Uses CSS custom properties for consistent theming.
+ */
+
 * {
     box-sizing: border-box;
 }
 
+/* === Design Tokens === */
 :root {
+    /* Gray scale - dark theme */
     --color-gray-900: #1a202c;
     --color-gray-800: #2d3748;
     --color-gray-700: #4a5568;
-    --color-gray-500: #e2e8f0;
+    --color-gray-600: #718096;
+    --color-gray-500: #a0aec0;
     --color-gray-400: #cbd5e0;
+    --color-gray-300: #e2e8f0;
+    
+    /* Accent colors */
     --color-blue-500: #63b3ed;
     --color-blue-600: #4299e1;
     --color-green-500: #48bb78;
     --color-red-500: #f56565;
     --color-red-400: #fc8181;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Border radius */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.6rem;
+    --radius-lg: 0.8rem;
+    --radius-xl: 1.5rem;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
 }
 
+/* === Base Styles === */
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--color-gray-900);
-    color: var(--color-gray-500);
+    color: var(--color-gray-300);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    padding: 1rem;
+    padding: var(--spacing-md);
 }
 
+/* === Accessibility === */
+
+/* Visually hidden but accessible to screen readers */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Show on focus for keyboard navigation */
+.visually-hidden.focus-visible:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    background: var(--color-blue-500);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    z-index: 1000;
+}
+
+/* Hidden utility class */
+.hidden {
+    display: none !important;
+}
+
+/* === Main Card === */
 .calculator-card {
     background-color: var(--color-gray-800);
     padding: 2.2rem;
-    border-radius: 1.5rem;
+    border-radius: var(--radius-xl);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     max-width: 480px;
     width: 100%;
@@ -40,29 +109,37 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-    /* Prevent horizontal scroll */
 }
 
-/* Tabs */
+/* === Tab Navigation === */
 .tab-nav {
     display: flex;
     background-color: var(--color-gray-900);
     padding: 6px;
     border-radius: 0.85rem;
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing-xl);
 }
 
 .tab-btn {
     flex: 1;
-    padding: 0.8rem;
+    padding: var(--spacing-lg) var(--spacing-sm);
     border: none;
     background: transparent;
     color: var(--color-gray-400);
     font-weight: 600;
     cursor: pointer;
-    border-radius: 0.6rem;
+    border-radius: var(--radius-md);
     font-size: 0.85rem;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
+}
+
+.tab-btn:hover {
+    color: var(--color-gray-300);
+}
+
+.tab-btn:focus {
+    outline: 2px solid var(--color-blue-500);
+    outline-offset: 2px;
 }
 
 .tab-btn.active {
@@ -78,24 +155,34 @@ body {
 
 .tab-panel.active {
     display: flex;
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn var(--transition-medium);
 }
 
-/* Inputs & Form Elements */
-.input-group,
-.mb-4 {
-    margin-bottom: 1.5rem;
+/* === Form Elements === */
+.input-group {
+    margin-bottom: var(--spacing-lg);
     text-align: left;
+}
+
+.mb-half {
+    margin-bottom: var(--spacing-sm);
 }
 
 .label-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--spacing-sm);
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--color-gray-400);
+}
+
+.small-label {
+    display: block;
+    margin-bottom: 4px;
+    opacity: 0.7;
+    font-size: 0.85rem;
 }
 
 .clean-select {
@@ -107,9 +194,14 @@ body {
     font-size: 0.9rem;
 }
 
+.clean-select:focus {
+    outline: 2px solid var(--color-blue-500);
+    outline-offset: 2px;
+}
+
 .coord-row {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--spacing-sm);
     margin-bottom: 0.6rem;
     width: 100%;
 }
@@ -121,9 +213,14 @@ body {
     color: var(--color-blue-500);
     font-weight: 700;
     border: 1px solid var(--color-gray-700);
-    border-radius: 0.6rem;
+    border-radius: var(--radius-md);
     cursor: pointer;
     text-align: center;
+}
+
+.hem-select:focus {
+    outline: 2px solid var(--color-blue-500);
+    outline-offset: 2px;
 }
 
 .num-input,
@@ -133,16 +230,17 @@ body {
     background-color: var(--color-gray-700);
     color: white;
     border: 1px solid var(--color-gray-700);
-    border-radius: 0.6rem;
+    border-radius: var(--radius-md);
     padding: 0.85rem;
     font-size: 1rem;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
 }
 
 .num-input:focus,
 .input-field:focus {
     outline: none;
     border-color: var(--color-blue-500);
+    box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.2);
 }
 
 .num-input.invalid,
@@ -151,24 +249,29 @@ body {
     background-color: rgba(245, 101, 101, 0.1);
 }
 
-/* Buttons */
+/* === Buttons === */
 .calculate-btn {
     background-color: var(--color-blue-500);
     color: white;
     padding: 1.2rem;
-    border-radius: 0.8rem;
+    border-radius: var(--radius-lg);
     font-weight: 700;
     width: 100%;
     border: none;
     cursor: pointer;
     margin-top: auto;
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-md);
     font-size: 1rem;
-    transition: background-color 0.2s;
+    transition: background-color var(--transition-fast);
 }
 
 .calculate-btn:hover {
     background-color: var(--color-blue-600);
+}
+
+.calculate-btn:focus {
+    outline: 2px solid var(--color-blue-500);
+    outline-offset: 2px;
 }
 
 .copy-btn {
@@ -180,12 +283,25 @@ body {
     color: var(--color-gray-400);
     cursor: pointer;
     font-size: 1.1rem;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
 }
 
-/* Swap Button */
+.copy-btn:hover {
+    color: var(--color-blue-500);
+    background-color: var(--color-gray-700);
+}
+
+.copy-btn:focus {
+    outline: 2px solid var(--color-blue-500);
+    outline-offset: 2px;
+}
+
+/* === Swap Button === */
 .swap-container {
     text-align: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--spacing-sm);
     position: relative;
     z-index: 10;
     width: 100%;
@@ -197,10 +313,10 @@ body {
     color: var(--color-gray-500);
     font-size: 1.8rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     line-height: 1;
     padding: 0.2rem 1rem;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-sm);
 }
 
 .swap-icon-btn:hover {
@@ -208,18 +324,23 @@ body {
     background-color: var(--color-gray-700);
 }
 
-/* Results */
+.swap-icon-btn:focus {
+    outline: 2px solid var(--color-blue-500);
+    outline-offset: 2px;
+}
+
+/* === Results === */
 .result-container {
     position: relative;
-    margin-top: 0.5rem;
+    margin-top: var(--spacing-sm);
 }
 
 .result-box {
     background-color: var(--color-gray-900);
-    padding: 1.5rem;
-    border-radius: 0.8rem;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
     text-align: center;
-    font-family: ui-monospace, monospace;
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
     font-weight: 700;
     font-size: 1.1rem;
     border: 1px solid var(--color-blue-500);
@@ -265,19 +386,24 @@ body {
 }
 
 .warning-text {
-    color: var(--color-red-500);
+    color: var(--color-red-400);
     font-size: 0.9rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--spacing-sm);
     display: block;
 }
 
 .result-box[data-warning="true"] {
     border: 2px solid var(--color-blue-500);
     background-color: rgba(99, 179, 237, 0.08);
-    /* Light blue tint */
 }
 
-/* Decorations */
+.coord-val {
+    display: inline-block;
+    white-space: nowrap;
+    margin: 0 var(--spacing-sm);
+}
+
+/* === Decorations === */
 .ducky-mascot {
     position: absolute;
     bottom: 10px;
@@ -294,18 +420,19 @@ body {
     cursor: help;
 }
 
+/* === Animations === */
 @keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateY(5px);
     }
-
     to {
         opacity: 1;
+        transform: translateY(0);
     }
 }
 
-/* Utility / Tailwind-ish */
+/* === Utility Classes === */
 .text-3xl {
     font-size: 1.875rem;
 }
@@ -319,15 +446,15 @@ body {
 }
 
 .mb-2 {
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--spacing-sm);
 }
 
 .text-sm {
     font-size: 0.875rem;
 }
 
-.text-gray-300 {
-    color: var(--color-gray-300);
+.text-gray-400 {
+    color: var(--color-gray-400);
 }
 
 .block {
@@ -338,12 +465,16 @@ body {
     display: flex;
 }
 
+.flex-1 {
+    flex: 1;
+}
+
 .items-center {
     align-items: center;
 }
 
-.space-x-2> :not([hidden])~ :not([hidden]) {
-    margin-left: 0.5rem;
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+    margin-left: var(--spacing-sm);
 }
 
 .flex-grow {
@@ -359,28 +490,125 @@ body {
 }
 
 .mt-6 {
-    margin-top: 1.5rem;
+    margin-top: var(--spacing-lg);
 }
 
 .text-left {
     text-align: left;
 }
 
-/* Responsiveness helpers */
+/* === Responsive Helpers === */
 .input-row-responsive {
     display: flex;
     gap: 0.8rem;
     flex-wrap: wrap;
 }
 
-.input-row-responsive>div {
+.input-row-responsive > div {
     min-width: 140px;
-    /* Ensure inputs don't get too squashed before wrapping */
 }
 
-/* Result Formatting */
-.coord-val {
-    display: inline-block;
-    white-space: nowrap;
-    margin: 0 0.5rem;
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+    .tab-panel.active {
+        animation: none;
+    }
+    
+    .tab-btn,
+    .num-input,
+    .input-field,
+    .calculate-btn,
+    .swap-icon-btn,
+    .copy-btn,
+    .hem-select,
+    .clean-select,
+    .ducky-mascot {
+        transition: none;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 1; }
+        to { opacity: 1; }
+    }
+}
+
+/* === High Contrast Mode === */
+@media (prefers-contrast: high) {
+    .result-box {
+        border-width: 2px;
+    }
+    
+    .num-input:focus,
+    .input-field:focus {
+        border-width: 2px;
+    }
+    
+    .tab-btn:focus,
+    .calculate-btn:focus,
+    .swap-icon-btn:focus,
+    .copy-btn:focus {
+        outline-width: 3px;
+    }
+}
+
+/* === Print Styles === */
+@media print {
+    body {
+        background-color: white;
+        color: black;
+        padding: 0;
+    }
+    
+    .calculator-card {
+        box-shadow: none;
+        border: 1px solid #333;
+        max-width: 100%;
+        min-height: auto;
+        padding: 1rem;
+    }
+    
+    .tab-nav,
+    .calculate-btn,
+    .copy-btn,
+    .swap-icon-btn,
+    .ducky-mascot,
+    .visually-hidden {
+        display: none !important;
+    }
+    
+    .tab-panel {
+        display: block !important;
+        page-break-inside: avoid;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 1rem;
+    }
+    
+    .result-box {
+        border: 1px solid #333;
+        background-color: #f5f5f5;
+        color: black;
+    }
+    
+    .result-positive,
+    .result-success {
+        color: #006600;
+    }
+    
+    .result-negative,
+    .result-error,
+    .warning-text {
+        color: #cc0000;
+    }
+    
+    .app-title {
+        color: black;
+        border-bottom: 2px solid #333;
+        padding-bottom: 0.5rem;
+    }
+    
+    .input-group,
+    .coord-row {
+        display: none;
+    }
 }
