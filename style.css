@@ -19,27 +19,27 @@
     --color-gray-500: #a0aec0;
     --color-gray-400: #cbd5e0;
     --color-gray-300: #e2e8f0;
-    
+
     /* Accent colors */
     --color-blue-500: #63b3ed;
     --color-blue-600: #4299e1;
     --color-green-500: #48bb78;
     --color-red-500: #f56565;
     --color-red-400: #fc8181;
-    
+
     /* Spacing */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
-    
+
     /* Border radius */
     --radius-sm: 0.5rem;
     --radius-md: 0.6rem;
     --radius-lg: 0.8rem;
     --radius-xl: 1.5rem;
-    
+
     /* Transitions */
     --transition-fast: 0.2s ease;
     --transition-medium: 0.3s ease;
@@ -426,6 +426,7 @@ body {
         opacity: 0;
         transform: translateY(5px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -473,7 +474,7 @@ body {
     align-items: center;
 }
 
-.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+.space-x-2> :not([hidden])~ :not([hidden]) {
     margin-left: var(--spacing-sm);
 }
 
@@ -504,7 +505,7 @@ body {
     flex-wrap: wrap;
 }
 
-.input-row-responsive > div {
+.input-row-responsive>div {
     min-width: 140px;
 }
 
@@ -513,7 +514,7 @@ body {
     .tab-panel.active {
         animation: none;
     }
-    
+
     .tab-btn,
     .num-input,
     .input-field,
@@ -525,10 +526,15 @@ body {
     .ducky-mascot {
         transition: none;
     }
-    
+
     @keyframes fadeIn {
-        from { opacity: 1; }
-        to { opacity: 1; }
+        from {
+            opacity: 1;
+        }
+
+        to {
+            opacity: 1;
+        }
     }
 }
 
@@ -537,12 +543,12 @@ body {
     .result-box {
         border-width: 2px;
     }
-    
+
     .num-input:focus,
     .input-field:focus {
         border-width: 2px;
     }
-    
+
     .tab-btn:focus,
     .calculate-btn:focus,
     .swap-icon-btn:focus,
@@ -558,7 +564,7 @@ body {
         color: black;
         padding: 0;
     }
-    
+
     .calculator-card {
         box-shadow: none;
         border: 1px solid #333;
@@ -566,7 +572,7 @@ body {
         min-height: auto;
         padding: 1rem;
     }
-    
+
     .tab-nav,
     .calculate-btn,
     .copy-btn,
@@ -575,7 +581,7 @@ body {
     .visually-hidden {
         display: none !important;
     }
-    
+
     .tab-panel {
         display: block !important;
         page-break-inside: avoid;
@@ -583,32 +589,109 @@ body {
         border-bottom: 1px solid #ccc;
         padding-bottom: 1rem;
     }
-    
+
     .result-box {
         border: 1px solid #333;
         background-color: #f5f5f5;
         color: black;
     }
-    
+
     .result-positive,
     .result-success {
         color: #006600;
     }
-    
+
     .result-negative,
     .result-error,
     .warning-text {
         color: #cc0000;
     }
-    
+
     .app-title {
         color: black;
         border-bottom: 2px solid #333;
         padding-bottom: 0.5rem;
     }
-    
+
     .input-group,
     .coord-row {
         display: none;
+    }
+}
+
+/* === Mobile Responsiveness === */
+@media (max-width: 500px) {
+    body {
+        padding: 1rem;
+        /* Guarantee card edges are visible */
+    }
+
+    .calculator-card {
+        padding: 2.2rem;
+        /* Exact match to Tab 1 / Default desktop style */
+        min-height: auto;
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .app-title {
+        font-size: 1.4rem;
+        margin-bottom: var(--spacing-md);
+        line-height: 1.2;
+        overflow-wrap: break-word;
+        /* Ensure titles wrap */
+    }
+
+    .label-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .tab-nav {
+        margin-bottom: var(--spacing-lg);
+        padding: 4px;
+    }
+
+    .tab-btn {
+        padding: var(--spacing-md) var(--spacing-xs);
+        font-size: 0.75rem;
+    }
+
+    .coord-row {
+        gap: 6px;
+        flex-wrap: wrap;
+        /* CRITICAL: Wrap items if they don't fit */
+    }
+
+    .num-input,
+    .input-field {
+        padding: 0.6rem 0.4rem;
+        /* Compact inputs to help them stay on one line if possible */
+        font-size: 0.9rem;
+        min-width: 60px;
+        /* Prevent shrinking too much */
+    }
+
+    .hem-select {
+        width: 55px;
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+
+    .calculate-btn {
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .result-box {
+        padding: var(--spacing-md);
+        font-size: 1rem;
+    }
+
+    .swap-icon-btn {
+        font-size: 1.5rem;
+        padding: 0.1rem 0.5rem;
     }
 }
