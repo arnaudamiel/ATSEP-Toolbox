@@ -12,19 +12,19 @@ const ATSEP_CONSTANTS = Object.freeze({
     INHG_TO_HPA: 33.86389,
     /** Standard conversion factor: hectopascals to inches of mercury */
     HPA_TO_INHG: 1 / 33.86389,
-    
+
     // === Distance Conversion ===
     /** Meters per nautical mile (international definition) */
     METERS_PER_NM: 1852,
     /** Nautical miles per meter */
     NM_PER_METER: 1 / 1852,
-    
+
     // === Altitude Conversion ===
     /** Feet to meters conversion factor */
     FEET_TO_METERS: 0.3048,
     /** Meters to feet conversion factor */
     METERS_TO_FEET: 1 / 0.3048,
-    
+
     // === ICAO Standard Atmosphere (Doc 7488/3) ===
     /** Standard sea level pressure in hPa */
     STANDARD_PRESSURE_HPA: 1013.25,
@@ -36,7 +36,7 @@ const ATSEP_CONSTANTS = Object.freeze({
     GRAVITY: 9.80665,
     /** Specific gas constant for dry air in J/(kg·K) */
     GAS_CONSTANT_DRY_AIR: 287.05287,
-    
+
     // === WGS-84 Ellipsoid Constants ===
     /** Semi-major axis (equatorial radius) in meters */
     WGS84_A: 6378137.0,
@@ -44,13 +44,13 @@ const ATSEP_CONSTANTS = Object.freeze({
     WGS84_B: 6356752.314245,
     /** Flattening */
     WGS84_F: 1 / 298.257223563,
-    
+
     // === Vincenty Algorithm Parameters ===
     /** Convergence threshold for iterative calculations */
     VINCENTY_CONVERGENCE: 1e-12,
     /** Maximum iterations before declaring non-convergence */
     VINCENTY_MAX_ITERATIONS: 100,
-    
+
     // === Vincenty Expansion Coefficients (Helmert's series) ===
     /** These are numerators of the Taylor series expansion for geodesic distance */
     VINCENTY_A_DENOM: 16384,
@@ -63,15 +63,16 @@ const ATSEP_CONSTANTS = Object.freeze({
     VINCENTY_B_C2: -128,
     VINCENTY_B_C3: 74,
     VINCENTY_B_C4: -47,
-    
+
     // === Pressure Limits for QNH ===
+    // Warning limits from NATS AERONAUTICAL INFORMATION CIRCULAR P 172/2024
     PRESSURE_LIMITS_HPA: Object.freeze({
         hardMin: 850,
         hardMax: 1100,
-        warningMin: 920,
-        warningMax: 1060
+        warningMin: 950,
+        warningMax: 1050
     }),
-    
+
     // === UI Constants ===
     /** Debounce delay for input saving in milliseconds */
     DEBOUNCE_DELAY_MS: 300,
