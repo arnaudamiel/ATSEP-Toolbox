@@ -94,7 +94,7 @@
 
 <body>
     <h1>🧪 ATSEP Toolbox - Unit Tests</h1>
-    <p>Testing QNH and Vincenty calculation modules.</p>
+    <p>Testing QNH, Vincenty, and WMMHR calculation modules.</p>
 
     <div id="results"></div>
     <div id="summary" class="summary"></div>
@@ -103,6 +103,7 @@
     <script src="../constants.js"></script>
     <script src="../QNH.js"></script>
     <script src="../Vincenty.js"></script>
+    <script src="../wmmhr.js"></script>
 
     <script>
         // Test framework
@@ -119,7 +120,8 @@
 
         function test(name, condition, expected, actual) {
             const status = condition ? 'pass' : 'fail';
-            if (condition) passed++; else failed++;
+            if (condition) passed++;
+            else failed++;
 
             let html = `<div class="test-result ${status}">`;
             html += `${status === 'pass' ? '✓' : '✗'} ${name}`;
@@ -136,10 +138,26 @@
             return Math.abs(a - b) < tolerance;
         }
 
-        function approxEqualPercent(a, b, percentTolerance = 1) {
-            const avg = (Math.abs(a) + Math.abs(b)) / 2;
-            if (avg === 0) return a === b;
-            return (Math.abs(a - b) / avg) * 100 < percentTolerance;
+        function updateSummary() {
+            const total = passed + failed;
+            const percentage = total === 0 ? 0 : ((passed / total) * 100).toFixed(1);
+
+            summaryDiv.className = 'summary ' + (failed === 0 ? 'all-pass' : 'has-failures');
+            summaryDiv.innerHTML = `
+                <strong>Test Results</strong><br>
+                <span class="pass-count">✓ ${passed} passed</span> / 
+                <span class="fail-count">✗ ${failed} failed</span> 
+                (${percentage}%)
+                <br><br>
+                ${failed === 0
+                    ? '🎉 All tests passed!'
+                    : '⚠️ Some tests failed. Please review the failures above.'}
+            `;
+
+            // Console log update
+            console.log(`\n=== ATSEP Toolbox Tests Update ===`);
+            console.log(`Passed: ${passed}/${total} (${percentage}%)`);
+            if (failed > 0) console.error(`Failed: ${failed} tests`);
         }
 
         // ===============================================
@@ -349,7 +367,10 @@
 
         // Test 26: Round trip - project and measure back
         (function () {
-            const start = { lat: 51.5, lon: -0.1 };
+            const start = {
+                lat: 51.5,
+                lon: -0.1
+            };
             const dist = 50000; // 50 km
             const bearing = 45;
 
@@ -418,30 +439,54 @@
         })();
 
         // ===============================================
-        // SUMMARY
+        // WMMHR MODULE TESTS (Async)
         // ===============================================
 
-        const total = passed + failed;
-        const percentage = ((passed / total) * 100).toFixed(1);
+        async function runWmmhrTests() {
+            section('WMMHR Module (Async)');
 
-        summaryDiv.className = 'summary ' + (failed === 0 ? 'all-pass' : 'has-failures');
-        summaryDiv.innerHTML = `
-            <strong>Test Results</strong><br>
-            <span class="pass-count">✓ ${passed} passed</span> / 
-            <span class="fail-count">✗ ${failed} failed</span> 
-            (${percentage}%)
-            <br><br>
-            ${failed === 0
-                ? '🎉 All tests passed!'
-                : '⚠️ Some tests failed. Please review the failures above.'}
-        `;
+            try {
+                const response = await fetch('../WMMHR.COF');
+                if (!response.ok) {
+                    test('Fetch WMMHR.COF', false, '200 OK', response.status);
+                    updateSummary();
+                    return;
+                }
 
-        // Log to console for CI/automation
-        console.log(`\n=== ATSEP Toolbox Tests ===`);
-        console.log(`Passed: ${passed}/${total} (${percentage}%)`);
-        if (failed > 0) {
-            console.error(`Failed: ${failed} tests`);
+                const cofData = await response.text();
+
+                // Test 34: Initialize
+                // We access the global WMMHR object loaded from ../wmmhr.js
+                WMMHR.init(cofData);
+                test('WMMHR initialized', WMMHR.isInitialized(), true, WMMHR.isInitialized());
+
+                // Test 35: Verify Epoch
+                const epoch = WMMHR.getEpoch();
+                test('Epoch parsing (2025.0)', approxEqual(epoch, 2025.0, 0.1), 2025.0, epoch);
+
+                // Test 36: Calculation (London, 2025.0)
+                // Expected D ~ 0.86 deg E (from our verification)
+                const res = WMMHR.calc(51.5, 0.0, 0, 2025.0);
+                test('Calc London (51.5, 0.0) D ≈ 0.86°',
+                    approxEqual(res.D, 0.86, 0.05), '~0.86', res.D.toFixed(2));
+
+                // Test 37: Calculation has all components
+                const hasKeys = 'D' in res && 'H' in res && 'Z' in res && 'eD' in res;
+                test('Result object structure', hasKeys, true, hasKeys);
+
+            } catch (err) {
+                test('WMMHR Test Exception', false, 'No Error', err.message);
+                console.error(err);
+            }
+
+            updateSummary();
         }
+
+        // Run sync tests
+        updateSummary();
+
+        // Trigger async tests
+        runWmmhrTests();
     </script>
 </body>
 
