@@ -114,6 +114,7 @@ const UI = (function () {
         _initTabs();
         _updateDependentUI();
         _initEasterEgg();
+        _initWMMHR();
     }
 
     /**
@@ -134,7 +135,10 @@ const UI = (function () {
             rangeUnitType: document.getElementById('range_unit_type'),
             destUnit: document.getElementById('d_unit'),
             distInput: document.getElementById('d_dist'),
-            brngInput: document.getElementById('d_brng')
+            brngInput: document.getElementById('d_brng'),
+            magFmtSel: document.getElementById('mag_fmt_sel'),
+            magDate: document.getElementById('mag_date'),
+            magRes: document.getElementById('mag_res')
         };
     }
 
@@ -179,7 +183,7 @@ const UI = (function () {
         });
 
         // Coordinate Format Selection
-        const fmtSelectors = ['coord_fmt', 'range_fmt_sel', 'dest_fmt_sel'];
+        const fmtSelectors = ['coord_fmt', 'range_fmt_sel', 'dest_fmt_sel', 'mag_fmt_sel'];
         fmtSelectors.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', (e) => _updateFmt(e.target.value));
@@ -232,6 +236,9 @@ const UI = (function () {
 
         const destBtn = document.querySelector('#dest-panel .calculate-btn');
         if (destBtn) destBtn.addEventListener('click', _runDest);
+
+        const magBtn = document.querySelector('#mag-panel .calculate-btn');
+        if (magBtn) magBtn.addEventListener('click', _runMag);
 
         // Copy Buttons
         document.querySelectorAll('.copy-btn').forEach(btn => {
@@ -324,7 +331,7 @@ const UI = (function () {
      */
     function _updateDependentUI() {
         // Re-render coordinate inputs based on format
-        ['r_origin', 'r_dest', 'd_start'].forEach(prefix => {
+        ['r_origin', 'r_dest', 'd_start', 'mag_coord'].forEach(prefix => {
             const container = document.getElementById(prefix + '_inputs');
             if (container) {
                 container.innerHTML = _createCoordRow(prefix, 'lat') + _createCoordRow(prefix, 'lon');
@@ -813,10 +820,118 @@ const UI = (function () {
     }
 
     // Public API
+    // --- Magnetic Variation Logic ---
+
+    /**
+     * Initializes the WMMHR model by loading coefficients.
+     * @private
+     */
+    async function _initWMMHR() {
+        if (typeof WMMHR === 'undefined') {
+            console.error("WMMHR module not loaded");
+            return;
+        }
+
+        try {
+            const response = await fetch('WMMHR.COF');
+            if (response.ok) {
+                const dataText = await response.text();
+                WMMHR.init(dataText);
+                console.log("WMMHR Initialized via UI");
+            } else {
+                console.warn("WMMHR.COF fetch failed", response.status);
+            }
+        } catch (e) {
+            console.warn("WMMHR initialization error", e);
+        }
+    }
+
+    /**
+     * Calculates Magnetic Variation.
+     * @private
+     */
+    function _runMag() {
+        const coords = _validateAndGetCoords('mag_coord', 'mag_res');
+        if (!coords) return;
+
+        const dateStr = elements.magDate ? elements.magDate.value : null;
+        if (!dateStr) {
+            elements.magRes.innerHTML = '<span class="result-error">Please select a date.</span>';
+            return;
+        }
+
+        const year = _dateToDecimalYear(dateStr);
+        // Altitude defaults to 0 km (MSL) as per requirements
+        const altKm = 0;
+
+        try {
+            if (!WMMHR.isInitialized()) {
+                elements.magRes.innerHTML = '<span class="result-error">Model not initialized. Check internet/files.</span>';
+                _initWMMHR(); // Try again for next time
+                return;
+            }
+
+            const epoch = WMMHR.getEpoch();
+            const epochRounded = Math.round(epoch);
+            let warningMsg = '';
+
+            // Rule 1: Date cannot be before model epoch
+            if (year < epoch) {
+                elements.magRes.innerHTML = `<span class="result-error">Date cannot be before model epoch ${epochRounded}.</span>`;
+                return;
+            }
+
+            // Rule 2: Warning if > 5 years past epoch
+            if (year > epoch + 5.0) {
+                warningMsg = `<div class="result-warning" style="margin-bottom:8px; font-size:0.9em; color:var(--warning-color);">Warning: Date is >5 years past epoch ${epochRounded}. Results may be inaccurate.</div>`;
+            }
+
+            const res = WMMHR.calc(coords.lat, coords.lon, altKm, year);
+
+            const formatChange = (val, unit) => {
+                const sign = val >= 0 ? "+" : "";
+                return `${sign}${val.toFixed(2)}${unit}/yr`;
+            };
+
+            const html = `
+                ${warningMsg}
+                <div class="result-row">
+                    <span class="label">Variation (D):</span> 
+                    <span class="val" style="font-weight:bold; color:var(--accent-color);">${res.D.toFixed(2)}° (${res.D >= 0 ? 'E' : 'W'})</span>
+                </div>
+                <div class="result-row" style="font-size: 0.9em; opacity: 0.8;">
+                    <span class="label">Uncertainty:</span> <span class="val">±${res.eD.toFixed(2)}°</span>
+                </div>
+                <div class="result-row" style="font-size: 0.9em; opacity: 0.8;">
+                    <span class="label">Secular Var:</span> <span class="val">${formatChange(res.dD, "°")}</span>
+                </div>
+            `;
+            elements.magRes.innerHTML = html;
+
+        } catch (e) {
+            elements.magRes.innerHTML = `<span class="result-error">Error: ${e.message}</span>`;
+        }
+    }
+
+    /**
+     * Converts YYYY-MM-DD string to Decimal Year.
+     * @param {string} dateString 
+     * @returns {number}
+     * @private
+     */
+    function _dateToDecimalYear(dateString) {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const start = new Date(year, 0, 1);
+        const end = new Date(year + 1, 0, 1);
+        const dayOfYear = (date - start) / (1000 * 60 * 60 * 24);
+        const daysInYear = (end - start) / (1000 * 60 * 60 * 24);
+        return year + (dayOfYear / daysInYear);
+    }
+
     return {
         init
     };
-
 })();
 
 // Auto-start on DOMContentLoaded

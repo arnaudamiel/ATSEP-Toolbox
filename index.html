@@ -59,6 +59,8 @@
                     aria-controls="range-panel">RANGE</button>
                 <button class="tab-btn" data-tab="dest-panel" role="tab" aria-selected="false"
                     aria-controls="dest-panel">DEST</button>
+                <button class="tab-btn" data-tab="mag-panel" role="tab" aria-selected="false"
+                    aria-controls="mag-panel">MAG VAR</button>
             </nav>
 
             <!-- Global Settings (Hidden, used by JS) -->
@@ -191,6 +193,36 @@
                 </div>
             </section>
 
+            <!-- Magnetic Variation Panel -->
+            <section id="mag-panel" class="tab-panel" role="tabpanel" aria-labelledby="mag-tab">
+                <h1 class="text-3xl font-bold mb-2 app-title">Magnetic Variation</h1>
+                <div class="label-row">
+                    <span id="mag-origin-label">Location</span>
+                    <label for="mag_fmt_sel" class="visually-hidden">Coordinate format</label>
+                    <select id="mag_fmt_sel" class="clean-select save-val">
+                        <option value="DD">DD</option>
+                        <option value="DDM">DDM</option>
+                        <option value="DMS">DMS</option>
+                    </select>
+                </div>
+
+                <div id="mag_coord_inputs" class="input-group" aria-labelledby="mag-origin-label"></div>
+
+                <div class="input-group">
+                    <label for="mag_date" class="label-row">Date</label>
+                    <input type="date" id="mag_date" class="num-input w-full save-val" style="padding: 12px;">
+                </div>
+
+                <button class="calculate-btn" type="button">Calculate Variation</button>
+
+                <div class="result-container">
+                    <button class="copy-btn" data-target="mag_res" type="button"
+                        aria-label="Copy result to clipboard">📋</button>
+                    <div id="mag_res" class="result-box" role="status" aria-live="polite"
+                        style="text-align: left; font-size: 0.95em;">---</div>
+                </div>
+            </section>
+
             <div class="ducky-mascot" title="Ducky: Ducky is here to help! Quack!" aria-hidden="true">🦆</div>
         </div>
     </main>
@@ -201,6 +233,7 @@
     <!-- Computation Modules -->
     <script src="Vincenty.js"></script>
     <script src="QNH.js"></script>
+    <script src="wmmhr.js"></script>
 
     <!-- Application Logic -->
     <script src="ui.js"></script>

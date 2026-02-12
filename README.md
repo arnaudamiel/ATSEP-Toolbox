@@ -27,6 +27,14 @@ Uses **Vincenty's Formulae** on the WGS-84 ellipsoid, providing distance and bea
 * **Flexible Formatting:** Support for Decimal Degrees (DD), Degrees Decimal Minutes (DDM), and Degrees Minutes Seconds (DMS).
 * **Coordinate Swap:** Quickly reverse origin and destination with one click.
 
+### 3. Magnetic Variation (WMMHR2025)
+
+* **Model Accuracy:** Uses the **World Magnetic Model High Resolution (WMMHR2025)** for high-precision magnetic variation calculations.
+* **Secular Variation:** Provides the rate of change for magnetic declination (degrees per year).
+* **Uncertainty Estimates:** Displays model uncertainty based on location and date.
+* **Epoch Validation:** Includes built-in checks for model epoch validity (currently 2025.0).
+* **Reference:** Based on [NCEI World Magnetic Model High Resolution](https://www.ncei.noaa.gov/products/world-magnetic-model-high-resolution).
+
 ## Usage
 
 The application is a **Progressive Web App (PWA)**.
@@ -37,12 +45,14 @@ The application is a **Progressive Web App (PWA)**.
 ### Installation
 
 **On Mobile (iOS/Android):**
+
 1. Open the website in your browser
 2. Tap the "Share" or menu button
 3. Select "Add to Home Screen"
 4. The app icon will appear on your home screen
 
 **On Desktop (Chrome/Edge):**
+
 1. Open the website
 2. Click the install icon in the address bar (or menu → "Install ATSEP Toolbox")
 
@@ -61,6 +71,8 @@ ATSEP-Toolbox/
 ├── constants.js    # Shared physical constants and conversion factors
 ├── Vincenty.js     # WGS-84 geodesic calculations (Vincenty's formulae)
 ├── QNH.js          # ICAO Standard Atmosphere calculations
+├── wmmhr.js        # WMMHR2025 magnetic model implementation
+├── WMMHR.COF       # High-resolution magnetic model coefficients
 ├── ui.js           # UI controller (DOM, events, validation)
 ├── app.js          # PWA service worker registration
 ├── sw.js           # Service worker for offline support
@@ -70,35 +82,23 @@ ATSEP-Toolbox/
 
 ### Module Overview
 
-| Module | Purpose |
-|--------|---------|
+| Module         | Purpose                                                                                          |
+| -------------- | ------------------------------------------------------------------------------------------------ |
 | `constants.js` | Centralized physical constants (WGS-84, ICAO atmosphere), conversion factors, and error messages |
-| `Vincenty.js` | Pure geodesic calculations - no dependencies on UI |
-| `QNH.js` | Pure atmospheric calculations - no dependencies on UI |
-| `ui.js` | All DOM manipulation, event handling, and input validation |
-| `app.js` | Service worker registration only |
+| `Vincenty.js`  | Pure geodesic calculations - no dependencies on UI                                               |
+| `QNH.js`       | Pure atmospheric calculations - no dependencies on UI                                            |
+| `wmmhr.js`     | World Magnetic Model High Resolution calculations                                                |
+| `ui.js`        | All DOM manipulation, event handling, and input validation                                       |
+| `app.js`       | Service worker registration only                                                                 |
 
-### Standards Compliance
+### Standards and Models Compliance
 
-| Standard | Application |
-|----------|-------------|
-| **ICAO Doc 7488/3** | Standard Atmosphere parameters for QNH calculations |
-| **WGS-84** | World Geodetic System 1984 ellipsoid parameters |
-| **Vincenty 1975** | Iterative geodesic formulae for sub-millimeter accuracy |
-
-### Key Constants
-
-```javascript
-// WGS-84 Ellipsoid
-Semi-major axis (a): 6,378,137.0 m
-Semi-minor axis (b): 6,356,752.314245 m
-Flattening (f): 1/298.257223563
-
-// ICAO Standard Atmosphere
-Standard pressure: 1013.25 hPa
-Standard temperature: 288.15 K (15°C)
-Temperature lapse rate: 0.0065 K/m
-```
+| Standard            | Application                                             |
+| ------------------- | ------------------------------------------------------- |
+| **ICAO Doc 7488/3** | Standard Atmosphere parameters for QNH calculations     |
+| **WGS-84**          | World Geodetic System 1984 ellipsoid parameters         |
+| **Vincenty 1975**   | Iterative geodesic formulae for sub-millimeter accuracy |
+| **WMMHR2025**       | High-definition magnetic field model (up to degree 133) |
 
 ---
 
@@ -139,15 +139,16 @@ python -m http.server 8000
 ### Browser Support
 
 | Browser | Minimum Version |
-|---------|-----------------|
-| Chrome | 80+ |
-| Firefox | 78+ |
-| Safari | 14+ |
-| Edge | 80+ |
+| ------- | --------------- |
+| Chrome  | 80+             |
+| Firefox | 78+             |
+| Safari  | 14+             |
+| Edge    | 80+             |
 
 ### Accessibility
 
 The application implements:
+
 - ARIA roles and labels for screen readers
 - Keyboard navigation support
 - Reduced motion support for users who prefer less animation
