@@ -2,14 +2,24 @@
     "name": "ATSEP Toolbox",
     "short_name": "ATSEP",
     "description": "Professional aviation toolbox for ATC Engineers with QNH corrections and geodesic calculations using Vincenty's algorithms on WGS-84.",
+    "id": "/index.html",
     "start_url": "./index.html",
     "scope": "./",
+    "display_override": [
+        "window-controls-overlay",
+        "standalone",
+        "minimal-ui"
+    ],
     "display": "standalone",
     "background_color": "#1a202c",
     "theme_color": "#1a202c",
     "lang": "en",
     "dir": "ltr",
-    "categories": ["utilities", "navigation", "productivity"],
+    "categories": [
+        "utilities",
+        "navigation",
+        "productivity"
+    ],
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

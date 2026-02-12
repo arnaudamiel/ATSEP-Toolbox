@@ -362,7 +362,7 @@ const UI = (function () {
 
         // Hemisphere Select
         const hemLabel = type === 'lat' ? 'Latitude hemisphere' : 'Longitude hemisphere';
-        html += `<select class="hem-select coord-input" data-part="h" aria-label="${hemLabel}">`;
+        html += `<select class="hem-select coord-input" name="${prefix}_${type}_hem" data-part="h" aria-label="${hemLabel}">`;
         if (type === 'lat') html += `<option value="1">N</option><option value="-1">S</option>`;
         else html += `<option value="1">E</option><option value="-1">W</option>`;
         html += `</select>`;
@@ -373,7 +373,7 @@ const UI = (function () {
 
         // Helper for input attributes
         const getAttrs = (part, max, step, label) => {
-            return `type="number" class="num-input coord-input" data-part="${part}" 
+            return `type="number" class="num-input coord-input" name="${prefix}_${type}_${part}" data-part="${part}" 
                     inputmode="decimal" min="0" max="${max}" step="${step}" aria-label="${label}"`;
         };
 

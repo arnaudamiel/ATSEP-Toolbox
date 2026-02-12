@@ -173,13 +173,13 @@
                     <div class="input-row-responsive">
                         <div class="flex-1">
                             <label for="d_dist" class="small-label">Range</label>
-                            <input type="number" id="d_dist" class="num-input w-full save-val" placeholder="0.0"
-                                inputmode="decimal" min="0" step="any">
+                            <input type="number" id="d_dist" name="d_dist" class="num-input w-full save-val"
+                                placeholder="0.0" inputmode="decimal" min="0" step="any">
                         </div>
                         <div class="flex-1">
                             <label for="d_brng" class="small-label">Bearing (°T)</label>
-                            <input type="number" id="d_brng" class="num-input w-full save-val" placeholder="360"
-                                inputmode="decimal" min="0" max="360" step="any">
+                            <input type="number" id="d_brng" name="d_brng" class="num-input w-full save-val"
+                                placeholder="360" inputmode="decimal" min="0" max="360" step="any">
                         </div>
                     </div>
                 </div>
@@ -199,7 +199,7 @@
                 <div class="label-row">
                     <span id="mag-origin-label">Location</span>
                     <label for="mag_fmt_sel" class="visually-hidden">Coordinate format</label>
-                    <select id="mag_fmt_sel" class="clean-select save-val">
+                    <select id="mag_fmt_sel" name="mag_fmt_sel" class="clean-select save-val">
                         <option value="DD">DD</option>
                         <option value="DDM">DDM</option>
                         <option value="DMS">DMS</option>
@@ -210,7 +210,8 @@
 
                 <div class="input-group">
                     <label for="mag_date" class="label-row">Date</label>
-                    <input type="date" id="mag_date" class="num-input w-full save-val" style="padding: 12px;">
+                    <input type="date" id="mag_date" name="mag_date" class="num-input w-full save-val"
+                        style="padding: 12px;">
                 </div>
 
                 <button class="calculate-btn" type="button">Calculate Variation</button>
