@@ -884,7 +884,7 @@ const UI = (function () {
 
             const formatChange = (val, unit) => {
                 const dir = val >= 0 ? "E" : "W";
-                return `${Math.abs(val).toFixed(2)}${unit} ${dir}/yr`;
+                return `${Math.abs(val).toFixed(2)}${unit} ${dir}`;
             };
 
             const html = `
