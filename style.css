@@ -337,7 +337,7 @@ body {
 
 .result-box {
     background-color: var(--color-gray-900);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-lg) 3rem;
     border-radius: var(--radius-lg);
     text-align: center;
     font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;

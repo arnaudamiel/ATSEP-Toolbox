@@ -4,10 +4,10 @@
  * Implements a cache-first strategy with background updates.
  * All assets are cached for offline use.
  * 
- * @version 1.2.3
+ * @version 1.2.4
  */
 
-const CACHE_NAME = 'atsep-calc-v1.2.3';
+const CACHE_NAME = 'atsep-calc-v1.2.4';
 
 /**
  * List of assets to cache for offline use.
@@ -56,6 +56,11 @@ self.addEventListener('fetch', (event) => {
 
     // Skip cross-origin requests (like Google Fonts)
     if (!event.request.url.startsWith(self.location.origin)) {
+        return;
+    }
+
+    // Skip tests directory - keep it in repo but out of PWA
+    if (event.request.url.includes('/tests/')) {
         return;
     }
 
