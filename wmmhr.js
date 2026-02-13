@@ -26,21 +26,36 @@ const WMMHR = (function () {
     let initialized = false;
 
     /**
-     * Initializes the model with magnetic coefficients.
-     * @param {string} dataString - The contents of WMMHR.COF
+     * Loads the WMMHR coefficients from the specified URL.
+     * @param {string} url - The URL to the WMMHR.COF file (default: 'WMMHR.COF')
+     * @returns {Promise<void>}
      */
-    function init(dataString) {
+    async function load(url = 'WMMHR.COF') {
+        if (initialized) return;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Failed to load WMMHR data: ${response.status}`);
+            const data = await response.text();
+            _parse(data);
+        } catch (error) {
+            console.error("WMMHR Load Error:", error);
+            throw error;
+        }
+    }
+
+    /**
+     * Parses the WMMHR coefficients data.
+     * @param {string} dataString - The contents of WMMHR.COF
+     * @private
+     */
+    function _parse(dataString) {
         if (initialized) return;
 
         let data = dataString;
         if (!data) {
-            // Check for legacy global variable if no string provided
-            if (typeof WMMHR_COF_DATA !== 'undefined') {
-                data = WMMHR_COF_DATA;
-            } else {
-                console.error("WMMHR Error: No data provided and WMMHR_COF_DATA not found.");
-                return;
-            }
+            console.error("WMMHR Error: No data provided.");
+            return;
         }
 
         const lines = data.trim().split('\n');
@@ -92,7 +107,10 @@ const WMMHR = (function () {
      * @param {number} year - Decimal Year (e.g., 2025.5)
      */
     function calc(lat, lon, altKm, year) {
-        if (!initialized) init();
+        if (!initialized) {
+            console.warn("WMMHR not initialized. Call WMMHR.load() first.");
+            return { D: 0, I: 0, H: 0, X: 0, Y: 0, Z: 0, F: 0, dD: 0, dI: 0, dH: 0, dX: 0, dY: 0, dZ: 0, dF: 0, eD: 0, eI: 0, eH: 0, eF: 0, eX: 0, eY: 0, eZ: 0 };
+        }
 
         const dt = year - EPOCH;
         const rLat = lat * (Math.PI / 180);
@@ -325,7 +343,7 @@ const WMMHR = (function () {
     }
 
     return {
-        init,
+        load,
         isInitialized: () => initialized,
         getEpoch: () => EPOCH,
         calc

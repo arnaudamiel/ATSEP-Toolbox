@@ -833,16 +833,10 @@ const UI = (function () {
         }
 
         try {
-            const response = await fetch('WMMHR.COF');
-            if (response.ok) {
-                const dataText = await response.text();
-                WMMHR.init(dataText);
-                console.log("WMMHR Initialized via UI");
-            } else {
-                console.warn("WMMHR.COF fetch failed", response.status);
-            }
+            await WMMHR.load('WMMHR.COF');
+            console.log("WMMHR Initialized via UI");
         } catch (e) {
-            console.warn("WMMHR initialization error", e);
+            console.warn("WMMHR.COF fetch failed/init error", e);
         }
     }
 
@@ -896,14 +890,11 @@ const UI = (function () {
             const html = `
                 ${warningMsg}
                 <div class="result-row">
-                    <span class="label">Variation (D):</span> 
-                    <span class="val" style="font-weight:bold; color:var(--accent-color);">${res.D.toFixed(2)}° (${res.D >= 0 ? 'E' : 'W'})</span>
+                    <span class="label">Variation:</span> 
+                    <span class="val" style="font-weight:bold; color:var(--accent-color);">${res.D.toFixed(2)}°±${res.eD.toFixed(2)}° ${res.D >= 0 ? 'E' : 'W'}</span>
                 </div>
                 <div class="result-row" style="font-size: 0.9em; opacity: 0.8;">
-                    <span class="label">Uncertainty:</span> <span class="val">±${res.eD.toFixed(2)}°</span>
-                </div>
-                <div class="result-row" style="font-size: 0.9em; opacity: 0.8;">
-                    <span class="label">Secular Var:</span> <span class="val">${formatChange(res.dD, "°")}</span>
+                    <span class="label">Annual Change:</span> <span class="val">${formatChange(res.dD, "°")}</span>
                 </div>
             `;
             elements.magRes.innerHTML = html;
