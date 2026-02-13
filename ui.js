@@ -877,23 +877,23 @@ const UI = (function () {
 
             // Rule 2: Warning if > 5 years past epoch
             if (year > epoch + 5.0) {
-                warningMsg = `<div class="result-warning" style="margin-bottom:8px; font-size:0.9em; color:var(--warning-color);">Warning: Date is >5 years past epoch ${epochRounded}. Results may be inaccurate.</div>`;
+                warningMsg = `<div class="result-warning" style="margin-bottom:8px; font-size:0.9em; color:white;">Warning: Date is >5 years past epoch ${epochRounded}. Results may be inaccurate.</div>`;
             }
 
             const res = WMMHR.calc(coords.lat, coords.lon, altKm, year);
 
             const formatChange = (val, unit) => {
-                const sign = val >= 0 ? "+" : "";
-                return `${sign}${val.toFixed(2)}${unit}/yr`;
+                const dir = val >= 0 ? "E" : "W";
+                return `${Math.abs(val).toFixed(2)}${unit} ${dir}/yr`;
             };
 
             const html = `
                 ${warningMsg}
                 <div class="result-row">
                     <span class="label">Variation:</span> 
-                    <span class="val" style="font-weight:bold; color:var(--accent-color);">${res.D.toFixed(2)}°±${res.eD.toFixed(2)}° ${res.D >= 0 ? 'E' : 'W'}</span>
+                    <span class="val" style="font-weight:bold; color:white;">${Math.abs(res.D).toFixed(2)}°±${res.eD.toFixed(2)}° ${res.D >= 0 ? 'E' : 'W'}</span>
                 </div>
-                <div class="result-row" style="font-size: 0.9em; opacity: 0.8;">
+                <div class="result-row" style="font-size: 0.9em; opacity: 0.8; color:white;">
                     <span class="label">Annual Change:</span> <span class="val">${formatChange(res.dD, "°")}</span>
                 </div>
             `;
