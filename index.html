@@ -209,9 +209,11 @@
                 <div id="mag_coord_inputs" class="input-group" aria-labelledby="mag-origin-label"></div>
 
                 <div class="input-group">
-                    <label for="mag_date" class="label-row">Date</label>
+                    <div class="label-row">
+                        <span id="mag-date-label">Date</span>
+                    </div>
                     <input type="date" id="mag_date" name="mag_date" class="num-input w-full save-val"
-                        style="padding: 12px;">
+                        aria-labelledby="mag-date-label">
                 </div>
 
                 <button class="calculate-btn" type="button">Calculate Variation</button>

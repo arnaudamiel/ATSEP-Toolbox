@@ -101,8 +101,8 @@ body {
     padding: 2.2rem;
     border-radius: var(--radius-xl);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    max-width: 480px;
-    width: 100%;
+    width: 480px;
+    max-width: 100%;
     border: 1px solid var(--color-gray-700);
     position: relative;
     min-height: 650px;
@@ -151,6 +151,7 @@ body {
     display: none;
     flex-grow: 1;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 .tab-panel.active {
@@ -167,6 +168,15 @@ body {
 .mb-half {
     margin-bottom: var(--spacing-sm);
 }
+
+/* Fixed height for coordinate input containers to prevent card resizing */
+#r_origin_inputs,
+#r_dest_inputs,
+#d_start_inputs,
+#mag_coord_inputs {
+    min-height: 7.5rem;
+}
+
 
 .label-row {
     display: flex;
@@ -204,6 +214,9 @@ body {
     gap: var(--spacing-sm);
     margin-bottom: 0.6rem;
     width: 100%;
+    min-height: 3rem;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .hem-select {

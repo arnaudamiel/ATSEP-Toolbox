@@ -300,13 +300,14 @@ const UI = (function () {
      */
     function _updateFmt(val) {
         // Sync all selectors
-        document.querySelectorAll('#coord_fmt, #range_fmt_sel, #dest_fmt_sel').forEach(el => {
+        document.querySelectorAll('#coord_fmt, #range_fmt_sel, #dest_fmt_sel, #mag_fmt_sel').forEach(el => {
             el.value = val;
         });
 
         SafeStorage.setItem(STORAGE_KEYS.COORD_FMT, val);
         SafeStorage.setItem('range_fmt_sel', val);
         SafeStorage.setItem('dest_fmt_sel', val);
+        SafeStorage.setItem('mag_fmt_sel', val);
 
         _updateDependentUI();
     }
