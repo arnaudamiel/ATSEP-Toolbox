@@ -856,7 +856,7 @@ const UI = (function () {
         }
 
         const year = _dateToDecimalYear(dateStr);
-        // Altitude defaults to 0 km (MSL) as per requirements
+        // Altitude defaults to 0 km (MSL)
         const altKm = 0;
 
         try {
@@ -876,7 +876,7 @@ const UI = (function () {
                 return;
             }
 
-            // Rule 2: Warning if > 5 years past epoch
+            // Rule 2: Warning if > 5 years past epoch, WMMHR is only valid for 5 years
             if (year > epoch + 5.0) {
                 warningMsg = `<div class="result-warning" style="margin-bottom:8px; font-size:0.9em; color:white;">Warning: Date is >5 years past epoch ${epochRounded}. Results may be inaccurate.</div>`;
             }
@@ -892,10 +892,10 @@ const UI = (function () {
                 ${warningMsg}
                 <div class="result-row">
                     <span class="label">Variation:</span> 
-                    <span class="val" style="font-weight:bold; color:white;">${Math.abs(res.D).toFixed(2)}°±${res.eD.toFixed(2)}° ${res.D >= 0 ? 'E' : 'W'}</span>
+                    <span class="val" style="font-weight:bold; color:white;">${Math.abs(res.D).toFixed(2)}° ${res.D >= 0 ? 'E' : 'W'}</span>
                 </div>
                 <div class="result-row" style="font-size: 0.9em; opacity: 0.8; color:white;">
-                    <span class="label">Annual Change:</span> <span class="val">${formatChange(res.dD, "°")}</span>
+                    <span class="label">Annual Change:</span> <span class="val" style="font-weight:bold; color:white;">${formatChange(res.dD, "°")}</span>
                 </div>
             `;
             elements.magRes.innerHTML = html;

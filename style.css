@@ -646,6 +646,8 @@ body {
         border-radius: var(--radius-xl);
         width: 100%;
         max-width: 100%;
+        /* Prevent width changes when switching tabs or coordinate formats */
+        box-sizing: border-box;
     }
 
     .app-title {
@@ -676,6 +678,17 @@ body {
         gap: 6px;
         flex-wrap: wrap;
         /* CRITICAL: Wrap items if they don't fit */
+        width: 100%;
+        /* Prevent parent card from resizing */
+    }
+
+    /* Ensure coordinate input containers don't cause card width changes */
+    #r_origin_inputs,
+    #r_dest_inputs,
+    #d_start_inputs,
+    #mag_coord_inputs {
+        width: 100%;
+        overflow-x: hidden;
     }
 
     .num-input,
