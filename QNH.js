@@ -1,13 +1,12 @@
 /**
  * QNH.js
- * Pure Standard Atmosphere Calculation Module.
+ * Standard Atmosphere Calculation Module.
  * 
  * Calculates altitude corrections based on QNH (barometric pressure at sea level).
  * Implements the barometric formula as defined in the ICAO Standard Atmosphere.
  * 
  * References:
  * - Manual of the ICAO Standard Atmosphere (Doc 7488/3)
- * - U.S. Standard Atmosphere, 1976
  * 
  * @module QNH
  * @author ATSEP Toolbox

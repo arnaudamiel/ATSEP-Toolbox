@@ -3,7 +3,7 @@
  * 
  * Centralizes DOM manipulation, event listeners, input validation,
  * and user interaction handling. All computation logic is delegated
- * to the QNH and Vincenty modules.
+ * to the QNH, Vincenty and WMMHR modules.
  * 
  * @module UI
  * @author ATSEP Toolbox

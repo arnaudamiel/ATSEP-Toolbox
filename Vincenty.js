@@ -1,6 +1,6 @@
 /**
  * Vincenty.js
- * Pure WGS-84 Geodesic Calculation Module using Vincenty's Formulae.
+ * WGS-84 Geodesic Calculation Module using Vincenty's Formulae.
  * 
  * This module implements Thaddeus Vincenty's iterative algorithms for
  * calculating geodesic distances and bearings on the WGS-84 ellipsoid.
