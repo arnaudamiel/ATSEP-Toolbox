@@ -114,6 +114,7 @@ body {
 /* === Tab Navigation === */
 .tab-nav {
     display: flex;
+    flex-wrap: wrap;
     background-color: var(--color-gray-900);
     padding: 6px;
     border-radius: 0.85rem;
