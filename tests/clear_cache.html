@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bypass Cache Test</title>
+</head>
+
+<body>
+    <script>
+        // Unregister all service workers to ensure we get a fresh test run
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+            // Also clear caches
+            caches.keys().then(function (names) {
+                for (let name of names)
+                    caches.delete(name);
+            });
+
+            // Redirect to test.html after a short delay
+            setTimeout(() => {
+                window.location.href = "test.html?" + new Date().getTime();
+            }, 1000);
+        } else {
+            window.location.href = "test.html?" + new Date().getTime();
+        }
+    </script>
+    <p>Clearing cache and redirecting to tests...</p>
+</body>
+
+</html>

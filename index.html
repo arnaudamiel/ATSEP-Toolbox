@@ -280,8 +280,11 @@
                             class="small-label w-auto flex-1">Longitude:</span><span
                             class="font-bold text-gray-300 text-right flex-1" id="gps_lon">--</span></div>
                     <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;"><span
-                            class="small-label w-auto flex-1">Altitude (GPS):</span><span
+                            class="small-label w-auto flex-1">Altitude (MSL):</span><span
                             class="font-bold text-gray-300 text-right flex-1" id="gps_alt">--</span></div>
+                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;"><span
+                            class="small-label w-auto flex-1">Geoid Sep (N):</span><span
+                            class="font-bold text-gray-300 text-right flex-1" id="gps_geoid_sep">--</span></div>
                     <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;"><span
                             class="small-label w-auto flex-1">Avg Accuracy:</span><span
                             class="font-bold text-gray-300 text-right flex-1" id="gps_acc">--</span></div>
@@ -326,6 +329,7 @@
     <script src="Vincenty.js"></script>
     <script src="QNH.js"></script>
     <script src="wmmhr.js"></script>
+    <script src="EGM96.js"></script>
     <script src="gps.js"></script>
 
     <!-- Application Logic -->

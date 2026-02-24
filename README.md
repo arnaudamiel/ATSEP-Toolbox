@@ -35,6 +35,12 @@ Uses **Vincenty's Formulae** on the WGS-84 ellipsoid, providing distance and bea
 * **Epoch Validation:** Includes built-in checks for model epoch validity (currently 2025.0).
 * **Reference:** Based on [NCEI World Magnetic Model High Resolution](https://www.ncei.noaa.gov/products/world-magnetic-model-high-resolution).
 
+### 4. Precision GPS Averager & Geoid Separation
+
+* **GPS Averager:** Offers a high-precision GPS averager to filter out location jitter and increase accuracy.
+* **EGM96 Geoid Model:** Integrates the EGM96 geoid model to provide altitude relative to Mean Sea Level (MSL) instead of standard WGS-84 GPS height.
+* **Smart Device Detection:** Automatically bypasses manual geoid corrections on iOS devices which natively calculate MSL natively, avoiding double corrections.
+
 ## Usage
 
 The application is a **Progressive Web App (PWA)**.
@@ -73,6 +79,8 @@ ATSEP-Toolbox/
 ├── QNH.js          # ICAO Standard Atmosphere calculations
 ├── wmmhr.js        # WMMHR2025 magnetic model implementation
 ├── WMMHR.COF       # High-resolution magnetic model coefficients
+├── EGM96.js        # EGM96 geoid calculation module
+├── WW15MGH.GRD     # EGM96 interpolation grid data
 ├── ui.js           # UI controller (DOM, events, validation)
 ├── app.js          # PWA service worker registration
 ├── sw.js           # Service worker for offline support
@@ -88,6 +96,7 @@ ATSEP-Toolbox/
 | `Vincenty.js`  | Pure geodesic calculations - no dependencies on UI                                               |
 | `QNH.js`       | Pure atmospheric calculations - no dependencies on UI                                            |
 | `wmmhr.js`     | World Magnetic Model High Resolution calculations                                                |
+| `EGM96.js`     | EGM96 Geoid Separation calculations                                                              |
 | `ui.js`        | All DOM manipulation, event handling, and input validation                                       |
 | `app.js`       | Service worker registration only                                                                 |
 
@@ -99,6 +108,7 @@ ATSEP-Toolbox/
 | **WGS-84**          | World Geodetic System 1984 ellipsoid parameters         |
 | **Vincenty 1975**   | Iterative geodesic formulae for sub-millimeter accuracy |
 | **WMMHR2025**       | High-definition magnetic field model (up to degree 133) |
+| **EGM96**           | Earth Gravitational Model 1996 for geoid separation     |
 
 ---
 

@@ -104,6 +104,7 @@
     <script src="../QNH.js"></script>
     <script src="../Vincenty.js"></script>
     <script src="../wmmhr.js"></script>
+    <script src="../EGM96.js"></script>
 
     <script>
         // Test framework
@@ -439,10 +440,10 @@
         })();
 
         // ===============================================
-        // WMMHR MODULE TESTS (Async)
+        // ASYNC MODULE TESTS (WMMHR, EGM96)
         // ===============================================
 
-        async function runWmmhrTests() {
+        async function runAsyncTests() {
             section('WMMHR Module (Async)');
 
             try {
@@ -470,14 +471,38 @@
                     console.error(err);
                 }
 
+                section('EGM96 Geoid Module (Async)');
+
+                try {
+                    const loader = new EGM96Loader();
+                    await loader.load('../WW15MGH.GRD');
+
+                    test('EGM96 grid loaded', loader.grid !== null && loader.grid.length > 0, true, loader.grid !== null);
+
+                    // Known point
+                    // Lat 51.32139°, Lon -0.54288° -> N = 46.15 m
+                    const lat = 51.32139;
+                    const lon = -0.54288;
+                    const N = loader.getN(lat, lon);
+
+                    test('EGM96 geoid separation at London roughly 46m', approxEqual(N, 46.15, 0.5), '46.15', N.toFixed(2));
+
+                } catch (err) {
+                    test('EGM96 Test Exception', false, 'No Error', err.message);
+                    console.error(err);
+                }
+
                 updateSummary();
+            } catch (err) {
+                console.error(err);
             }
+        }
 
         // Run sync tests
         updateSummary();
 
-            // Trigger async tests
-            runWmmhrTests();
+        // Trigger async tests
+        runAsyncTests();
     </script>
 </body>
 

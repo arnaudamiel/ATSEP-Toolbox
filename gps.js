@@ -27,6 +27,17 @@ function calculateGPSMetrics(samples) {
 
     const avgAcc = samples.reduce((sum, s) => sum + s.acc, 0) / samples.length;
 
+    let avgGeoidSep = null;
+    let avgMslAlt = avgAlt; // Default MSL altitude to raw GPS altitude
+
+    // Apply EGM96 correction if grid is loaded, we have altitude, and it's not iOS
+    if (avgAlt !== null && isEgm96Loaded) {
+        avgGeoidSep = egm96Loader.getN(avgLat, avgLon);
+        if (!isIOS) {
+            avgMslAlt = avgAlt - avgGeoidSep;
+        }
+    }
+
     let stdDev = 0;
     let cep95 = 0;
 
@@ -50,6 +61,8 @@ function calculateGPSMetrics(samples) {
         avgLat,
         avgLon,
         avgAlt,
+        avgMslAlt,
+        avgGeoidSep,
         avgAcc,
         stdDev,
         cep95
@@ -62,6 +75,24 @@ let gpsSamples = [];
 let gpsStartTime = null;
 let gpsElapsedTimer = null;
 let gpsRejectedCount = 0;
+
+// EGM96 Geoid Loader instance
+const egm96Loader = new EGM96Loader();
+// State to track if grid is loaded successfully
+let isEgm96Loaded = false;
+
+// iOS detection: iPhones naturally provide altitude relative to MSL
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+// Attempt to load the grid data asynchronously
+egm96Loader.load('WW15MGH.GRD')
+    .then(() => {
+        isEgm96Loaded = true;
+        console.log('EGM96 Geoid grid loaded successfully');
+    })
+    .catch(err => {
+        console.error('Failed to load EGM96 grid:', err);
+    });
 
 function formatCoord(deg, isLat) {
     if (isNaN(deg)) return '--';
@@ -83,6 +114,7 @@ function updateGPSUI() {
         document.getElementById('gps_lat').textContent = '--';
         document.getElementById('gps_lon').textContent = '--';
         document.getElementById('gps_alt').textContent = '--';
+        document.getElementById('gps_geoid_sep').textContent = '--';
         document.getElementById('gps_acc').textContent = '--';
         document.getElementById('gps_stddev').textContent = '--';
         document.getElementById('gps_cep').textContent = '--';
@@ -91,7 +123,18 @@ function updateGPSUI() {
 
     document.getElementById('gps_lat').textContent = formatCoord(metrics.avgLat, true);
     document.getElementById('gps_lon').textContent = formatCoord(metrics.avgLon, false);
-    document.getElementById('gps_alt').textContent = metrics.avgAlt !== null ? `${metrics.avgAlt.toFixed(1)} m` : 'N/A';
+    
+    // Display Height
+    if (metrics.avgMslAlt !== null) {
+         let altText = `${metrics.avgMslAlt.toFixed(1)} m`;
+         // if it's iOS, MSL alt is the raw GPS alt, geoid separation is ignored
+         if (isIOS) altText += ' (native MSL)'; 
+         document.getElementById('gps_alt').textContent = altText;
+    } else {
+         document.getElementById('gps_alt').textContent = 'N/A';
+    }
+    
+    document.getElementById('gps_geoid_sep').textContent = metrics.avgGeoidSep !== null ? `${metrics.avgGeoidSep.toFixed(2)} m` : '--';
     document.getElementById('gps_acc').textContent = `${metrics.avgAcc.toFixed(1)} m`;
 
     document.getElementById('gps_stddev').textContent = metrics.stdDev ? `±${metrics.stdDev.toFixed(2)} m` : '--';
