@@ -288,28 +288,17 @@ body {
     outline-offset: 2px;
 }
 
-.copy-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    color: var(--color-gray-400);
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: var(--spacing-xs);
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
+/* === Copy to Clipboard Feedback === */
+.copy-target {
+    transition: background-color var(--transition-fast);
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: pan-y;
 }
 
-.copy-btn:hover {
-    color: var(--color-blue-500);
-    background-color: var(--color-gray-700);
-}
-
-.copy-btn:focus {
-    outline: 2px solid var(--color-blue-500);
-    outline-offset: 2px;
+.flash-copied {
+    background-color: rgba(99, 179, 237, 0.4) !important;
+    transition: background-color 0.1s ease !important;
 }
 
 /* === Swap Button === */
@@ -534,7 +523,6 @@ body {
     .input-field,
     .calculate-btn,
     .swap-icon-btn,
-    .copy-btn,
     .hem-select,
     .clean-select,
     .ducky-mascot {
@@ -565,8 +553,7 @@ body {
 
     .tab-btn:focus,
     .calculate-btn:focus,
-    .swap-icon-btn:focus,
-    .copy-btn:focus {
+    .swap-icon-btn:focus {
         outline-width: 3px;
     }
 }
@@ -589,7 +576,6 @@ body {
 
     .tab-nav,
     .calculate-btn,
-    .copy-btn,
     .swap-icon-btn,
     .ducky-mascot,
     .visually-hidden {

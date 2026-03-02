@@ -2,7 +2,7 @@
 
 # ATSEP Toolbox
 
-**ATSEP Toolbox** is a comprehensive Progressive Web App (PWA) designed for ATC Engineers and aviation professionals. It provides accurate, standards-compliant calculation tools that work completely offline.
+**ATSEP Toolbox** is a comprehensive Progressive Web App (PWA) designed for ATC Engineers and aviation enthusiasts. It provides accurate, standards-compliant calculation tools that work completely offline.
 
 [![PWA Ready](https://img.shields.io/badge/PWA-Ready-blue)](https://arnaudamiel.github.io/ATSEP-Toolbox)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -24,7 +24,7 @@ Uses **Vincenty's Formulae** on the WGS-84 ellipsoid, providing distance and bea
 * **Range (Inverse):** Calculate the geodesic distance and initial bearing between two points.
 * **Destination (Direct):** Project a new point given a starting point, distance, and bearing.
 * **Linked Units:** Seamlessly switch between Nautical Miles (NM) and Meters (M) across tabs.
-* **Flexible Formatting:** Support for Decimal Degrees (DD), Degrees Decimal Minutes (DDM), and Degrees Minutes Seconds (DMS).
+* **Dynamic Synchronization:** Display formats (DD, DDM, DMS) are synchronized across all tabs, with results re-rendering instantly upon change.
 * **Coordinate Swap:** Quickly reverse origin and destination with one click.
 
 ### 3. Magnetic Variation (WMMHR2025)
@@ -39,7 +39,13 @@ Uses **Vincenty's Formulae** on the WGS-84 ellipsoid, providing distance and bea
 
 * **GPS Averager:** Offers a high-precision GPS averager to filter out location jitter and increase accuracy.
 * **EGM96 Geoid Model:** Integrates the EGM96 geoid model to provide altitude relative to Mean Sea Level (MSL) instead of standard WGS-84 GPS height.
-* **Smart Device Detection:** Automatically bypasses manual geoid corrections on iOS devices which natively calculate MSL natively, avoiding double corrections.
+* **Height Unit Selection:** Supports toggling between Meters (0.1m precision) and Feet (rounded to nearest integer) for all altitude, geoid, and accuracy metrics.
+* **Smart Device Detection:** Automatically bypasses manual geoid corrections on iOS devices which natively calculate MSL, avoiding double corrections.
+
+### 5. Seamless Interaction
+
+* **Click-and-Hold to Copy:** Professional interface designed for speed. Simply hold down a mouse click or long-press a result field for 1 second to copy it to the clipboard, accompanied by a visual confirmation flash.
+* **Auto-Save:** All settings and inputs are automatically persisted in local storage.
 
 ## Usage
 
@@ -204,4 +210,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Thaddeus Vincenty for the geodesic formulae
 - ICAO for the Standard Atmosphere documentation
+- The USA tax payers for their contribution to the various earth models
 - The aviation community for feedback and testing

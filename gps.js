@@ -97,11 +97,24 @@ egm96Loader.load('WW15MGH.GRD')
 function formatCoord(deg, isLat) {
     if (isNaN(deg)) return '--';
     const num = Math.abs(deg);
-    const d = Math.floor(num);
-    const m = Math.floor((num - d) * 60);
-    const s = ((num - d - m / 60) * 3600).toFixed(2);
     const dir = isLat ? (deg >= 0 ? 'N' : 'S') : (deg >= 0 ? 'E' : 'W');
-    return `${d}° ${m}' ${s}" ${dir}`;
+
+    // Get globally selected format or fallback to DMS as default
+    const fmtSel = document.getElementById('gps_fmt_sel');
+    const fmt = fmtSel ? fmtSel.value : 'DMS';
+
+    if (fmt === 'DD') {
+        return `${num.toFixed(5)}° ${dir}`;
+    } else if (fmt === 'DDM') {
+        const d = Math.floor(num);
+        const m = ((num - d) * 60).toFixed(4);
+        return `${d}° ${m}' ${dir}`;
+    } else { // DMS
+        const d = Math.floor(num);
+        const m = Math.floor((num - d) * 60);
+        const s = ((num - d - m / 60) * 3600).toFixed(2);
+        return `${d}° ${m}' ${s}" ${dir}`;
+    }
 }
 
 function updateGPSUI() {
@@ -123,22 +136,32 @@ function updateGPSUI() {
 
     document.getElementById('gps_lat').textContent = formatCoord(metrics.avgLat, true);
     document.getElementById('gps_lon').textContent = formatCoord(metrics.avgLon, false);
-    
+
+    // Determine units
+    const altUnitSel = document.getElementById('gps_alt_unit');
+    const altUnit = altUnitSel ? altUnitSel.value : 'meters';
+    const isFeet = altUnit === 'feet';
+    const unitLabel = isFeet ? 'ft' : 'm';
+
+    // Use conversion factor from constants
+    const convert = (val) => isFeet ? val * (typeof ATSEP_CONSTANTS !== 'undefined' ? ATSEP_CONSTANTS.METERS_TO_FEET : 3.28084) : val;
+    const formatVal = (val) => isFeet ? Math.round(convert(val)).toString() : convert(val).toFixed(1);
+
     // Display Height
     if (metrics.avgMslAlt !== null) {
-         let altText = `${metrics.avgMslAlt.toFixed(1)} m`;
-         // if it's iOS, MSL alt is the raw GPS alt, geoid separation is ignored
-         if (isIOS) altText += ' (native MSL)'; 
-         document.getElementById('gps_alt').textContent = altText;
+        let altText = `${formatVal(metrics.avgMslAlt)} ${unitLabel}`;
+        // if it's iOS, MSL alt is the raw GPS alt, geoid separation is ignored
+        if (isIOS) altText += ' (native MSL)';
+        document.getElementById('gps_alt').textContent = altText;
     } else {
-         document.getElementById('gps_alt').textContent = 'N/A';
+        document.getElementById('gps_alt').textContent = 'N/A';
     }
-    
-    document.getElementById('gps_geoid_sep').textContent = metrics.avgGeoidSep !== null ? `${metrics.avgGeoidSep.toFixed(2)} m` : '--';
-    document.getElementById('gps_acc').textContent = `${metrics.avgAcc.toFixed(1)} m`;
 
-    document.getElementById('gps_stddev').textContent = metrics.stdDev ? `±${metrics.stdDev.toFixed(2)} m` : '--';
-    document.getElementById('gps_cep').textContent = metrics.cep95 ? `±${metrics.cep95.toFixed(2)} m` : '--';
+    document.getElementById('gps_geoid_sep').textContent = metrics.avgGeoidSep !== null ? `${formatVal(metrics.avgGeoidSep)} ${unitLabel}` : '--';
+    document.getElementById('gps_acc').textContent = `${formatVal(metrics.avgAcc)} ${unitLabel}`;
+
+    document.getElementById('gps_stddev').textContent = metrics.stdDev ? `±${formatVal(metrics.stdDev)} ${unitLabel}` : '--';
+    document.getElementById('gps_cep').textContent = metrics.cep95 ? `±${formatVal(metrics.cep95)} ${unitLabel}` : '--';
 
     // Update quality indicator
     const qv = document.getElementById('qualityValue');
@@ -247,7 +270,6 @@ window.startAveraging = function () {
     document.getElementById('startGpsBtn').disabled = true;
     document.getElementById('stopGpsBtn').disabled = false;
     document.getElementById('resetGpsBtn').disabled = true;
-    document.getElementById('copyGpsBtn').disabled = true;
 
     document.getElementById('gps_status').textContent = "Averaging in progress...";
     document.getElementById('gps_status').className = "result-positive text-center mb-half";
@@ -276,7 +298,6 @@ window.stopAveraging = function () {
     document.getElementById('resetGpsBtn').disabled = false;
 
     if (gpsSamples.length > 0) {
-        document.getElementById('copyGpsBtn').disabled = false;
         document.getElementById('gps_status').textContent = "Averaging completed.";
         document.getElementById('gps_status').className = "result-success text-center mb-half";
     } else {
@@ -295,7 +316,6 @@ window.resetData = function () {
     document.getElementById('startGpsBtn').disabled = false;
     document.getElementById('stopGpsBtn').disabled = true;
     document.getElementById('resetGpsBtn').disabled = true;
-    document.getElementById('copyGpsBtn').disabled = true;
 
     document.getElementById('gps_status').textContent = "Ready to start";
     document.getElementById('gps_status').className = "warning-text text-center mb-half";
@@ -306,30 +326,19 @@ window.resetData = function () {
     document.getElementById('qualityLabel').textContent = 'Waiting to start...';
 };
 
-window.copyCoordinates = function () {
-    const lat = document.getElementById('gps_lat').textContent;
-    const lon = document.getElementById('gps_lon').textContent;
-    const textToCopy = `${lat}, ${lon}`;
-
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        const btn = document.getElementById('copyGpsBtn');
-        const originalText = btn.textContent;
-        btn.textContent = "Copied!";
-        setTimeout(() => {
-            btn.textContent = originalText;
-        }, 2000);
-    });
-};
+window.updateGPSUI = updateGPSUI;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Attach event listeners to buttons using the functions defined above
     const startBtn = document.getElementById('startGpsBtn');
     const stopBtn = document.getElementById('stopGpsBtn');
     const resetBtn = document.getElementById('resetGpsBtn');
-    const copyBtn = document.getElementById('copyGpsBtn');
+
+    // Add event listener for altitude unit change
+    const altUnitSel = document.getElementById('gps_alt_unit');
 
     if (startBtn) startBtn.addEventListener('click', window.startAveraging);
     if (stopBtn) stopBtn.addEventListener('click', window.stopAveraging);
     if (resetBtn) resetBtn.addEventListener('click', window.resetData);
-    if (copyBtn) copyBtn.addEventListener('click', window.copyCoordinates);
+    if (altUnitSel) altUnitSel.addEventListener('change', window.updateGPSUI);
 });

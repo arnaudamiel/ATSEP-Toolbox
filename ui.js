@@ -183,7 +183,7 @@ const UI = (function () {
         });
 
         // Coordinate Format Selection
-        const fmtSelectors = ['coord_fmt', 'range_fmt_sel', 'dest_fmt_sel', 'mag_fmt_sel'];
+        const fmtSelectors = ['coord_fmt', 'range_fmt_sel', 'dest_fmt_sel', 'mag_fmt_sel', 'gps_fmt_sel'];
         fmtSelectors.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', (e) => _updateFmt(e.target.value));
@@ -240,12 +240,25 @@ const UI = (function () {
         const magBtn = document.querySelector('#mag-panel .calculate-btn');
         if (magBtn) magBtn.addEventListener('click', _runMag);
 
-        // Copy Buttons
-        document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const targetId = e.currentTarget.getAttribute('data-target');
-                _copyResult(targetId);
-            });
+        // Click-and-hold to copy
+        document.querySelectorAll('.copy-target').forEach(el => {
+            let pressTimer;
+            const startCopyTimer = (e) => {
+                if (e.type === 'mousedown' && e.button !== 0) return; // Only trigger on left click
+                pressTimer = setTimeout(() => {
+                    _copyResult(el.id);
+                }, 1000); // 1 second hold
+            };
+            const cancelCopyTimer = () => {
+                if (pressTimer) clearTimeout(pressTimer);
+            };
+
+            el.addEventListener('mousedown', startCopyTimer);
+            el.addEventListener('touchstart', startCopyTimer, { passive: true });
+            el.addEventListener('mouseup', cancelCopyTimer);
+            el.addEventListener('mouseleave', cancelCopyTimer);
+            el.addEventListener('touchend', cancelCopyTimer);
+            el.addEventListener('touchcancel', cancelCopyTimer);
         });
     }
 
@@ -300,16 +313,23 @@ const UI = (function () {
      */
     function _updateFmt(val) {
         // Sync all selectors
-        document.querySelectorAll('#coord_fmt, #range_fmt_sel, #dest_fmt_sel, #mag_fmt_sel').forEach(el => {
-            el.value = val;
+        document.querySelectorAll('#coord_fmt, #range_fmt_sel, #dest_fmt_sel, #mag_fmt_sel, #gps_fmt_sel').forEach(el => {
+            if (el) el.value = val;
         });
 
         SafeStorage.setItem(STORAGE_KEYS.COORD_FMT, val);
         SafeStorage.setItem('range_fmt_sel', val);
         SafeStorage.setItem('dest_fmt_sel', val);
         SafeStorage.setItem('mag_fmt_sel', val);
+        SafeStorage.setItem('gps_fmt_sel', val);
 
         _updateDependentUI();
+
+        // Re-run calculations to update displayed results to the new format directly
+        if (elements.rangeRes && elements.rangeRes.innerText !== '---') _runRange();
+        if (elements.destRes && elements.destRes.innerText !== '---') _runDest();
+        if (elements.magRes && elements.magRes.innerText !== '---') _runMag();
+        if (typeof window.updateGPSUI === 'function') window.updateGPSUI();
     }
 
     /**
@@ -409,8 +429,13 @@ const UI = (function () {
     function _copyResult(elementId) {
         const el = document.getElementById(elementId);
         if (el) {
-            navigator.clipboard.writeText(el.innerText)
-                .catch(err => console.error('Copy failed', err));
+            navigator.clipboard.writeText(el.innerText).then(() => {
+                // Visual feedback flash
+                el.classList.add('flash-copied');
+                setTimeout(() => {
+                    el.classList.remove('flash-copied');
+                }, 200);
+            }).catch(err => console.error('Copy failed', err));
         }
     }
 
