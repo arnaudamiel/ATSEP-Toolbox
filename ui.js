@@ -868,7 +868,7 @@ const UI = (function () {
         }
 
         try {
-            await WMMHR.load('WMMHR.COF');
+            await WMMHR.load('WMMHR.COF.gz');
             console.log("WMMHR Initialized via UI");
         } catch (e) {
             console.warn("WMMHR.COF fetch failed/init error", e);

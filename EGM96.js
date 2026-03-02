@@ -8,7 +8,20 @@ class EGM96Loader {
     async load(url) {
         const resp = await fetch(url);
         if (!resp.ok) throw new Error("Could not find " + url);
-        const text = await resp.text();
+        // Fetch as ArrayBuffer to check magic bytes
+        const buffer = await resp.arrayBuffer();
+        const view = new Uint8Array(buffer);
+        let text;
+
+        // Check for gzip magic numbers: 0x1F, 0x8B
+        if (view.length >= 2 && view[0] === 0x1F && view[1] === 0x8B && typeof DecompressionStream !== 'undefined') {
+            const ds = new DecompressionStream('gzip');
+            const stream = new Response(buffer).body.pipeThrough(ds);
+            text = await new Response(stream).text();
+        } else {
+            // Either not gzipped (server auto-decompressed) or browser doesn't support DecompressionStream
+            text = new TextDecoder().decode(buffer);
+        }
 
         // Parse ASCII grid file
         const lines = text.split(/\r?\n/);

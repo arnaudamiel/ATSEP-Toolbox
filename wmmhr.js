@@ -27,16 +27,31 @@ const WMMHR = (function () {
 
     /**
      * Loads the WMMHR coefficients from the specified URL.
-     * @param {string} url - The URL to the WMMHR.COF file (default: 'WMMHR.COF')
+     * @param {string} url - The URL to the WMMHR.COF file (default: 'WMMHR.COF.gz')
      * @returns {Promise<void>}
      */
-    async function load(url = 'WMMHR.COF') {
+    async function load(url = 'WMMHR.COF.gz') {
         if (initialized) return;
 
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Failed to load WMMHR data: ${response.status}`);
-            const data = await response.text();
+
+            // Fetch as ArrayBuffer to check magic bytes
+            const buffer = await response.arrayBuffer();
+            const view = new Uint8Array(buffer);
+            let data;
+
+            // Check for gzip magic numbers: 0x1F, 0x8B
+            if (view.length >= 2 && view[0] === 0x1F && view[1] === 0x8B && typeof DecompressionStream !== 'undefined') {
+                const ds = new DecompressionStream('gzip');
+                const stream = new Response(buffer).body.pipeThrough(ds);
+                data = await new Response(stream).text();
+            } else {
+                // Either not gzipped (server auto-decompressed) or browser doesn't support DecompressionStream
+                data = new TextDecoder().decode(buffer);
+            }
+
             _parse(data);
         } catch (error) {
             console.error("WMMHR Load Error:", error);

@@ -84,9 +84,9 @@ ATSEP-Toolbox/
 ├── Vincenty.js     # WGS-84 geodesic calculations (Vincenty's formulae)
 ├── QNH.js          # ICAO Standard Atmosphere calculations
 ├── wmmhr.js        # WMMHR2025 magnetic model implementation
-├── WMMHR.COF       # High-resolution magnetic model coefficients
+├── WMMHR.COF.gz    # High-resolution magnetic model coefficients (compressed)
 ├── EGM96.js        # EGM96 geoid calculation module
-├── WW15MGH.GRD     # EGM96 interpolation grid data
+├── WW15MGH.GRD.gz  # EGM96 interpolation grid data (compressed)
 ├── ui.js           # UI controller (DOM, events, validation)
 ├── app.js          # PWA service worker registration
 ├── sw.js           # Service worker for offline support

@@ -449,7 +449,7 @@
             try {
                 try {
                     // Test 34: Initialize (Async load from file)
-                    await WMMHR.load('../WMMHR.COF');
+                    await WMMHR.load('../WMMHR.COF.gz');
                     test('WMMHR initialized', WMMHR.isInitialized(), true, WMMHR.isInitialized());
 
                     // Test 35: Verify Epoch
@@ -475,7 +475,7 @@
 
                 try {
                     const loader = new EGM96Loader();
-                    await loader.load('../WW15MGH.GRD');
+                    await loader.load('../WW15MGH.GRD.gz');
 
                     test('EGM96 grid loaded', loader.grid !== null && loader.grid.length > 0, true, loader.grid !== null);
 

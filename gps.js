@@ -84,7 +84,7 @@ let isEgm96Loaded = false;
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 // Attempt to load the grid data asynchronously
-egm96Loader.load('WW15MGH.GRD')
+egm96Loader.load('WW15MGH.GRD.gz')
     .then(() => {
         isEgm96Loaded = true;
         console.log('EGM96 Geoid grid loaded successfully');

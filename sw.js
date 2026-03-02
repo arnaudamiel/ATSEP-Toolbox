@@ -4,10 +4,10 @@
  * Implements a cache-first strategy with background updates.
  * All assets are cached for offline use.
  * 
- * @version 1.3.3
+ * @version 1.4.0
  */
 
-const CACHE_NAME = 'atsep-calc-v1.3.3';
+const CACHE_NAME = 'atsep-calc-v1.4.0';
 
 /**
  * List of assets to cache for offline use.
@@ -25,8 +25,8 @@ const ASSETS_TO_CACHE = [
     './wmmhr.js',
     './EGM96.js',
     './gps.js',
-    './WMMHR.COF',
-    './WW15MGH.GRD',
+    './WMMHR.COF.gz',
+    './WW15MGH.GRD.gz',
     './manifest.json',
     './icon-192.png',
     './icon-512.png',
