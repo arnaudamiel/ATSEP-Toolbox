@@ -123,7 +123,6 @@ const UI = (function () {
      */
     function _cacheElements() {
         elements = {
-            coordFmt: document.getElementById('coord_fmt'),
             rangeFmtSel: document.getElementById('range_fmt_sel'),
             destFmtSel: document.getElementById('dest_fmt_sel'),
             pressureInput: document.getElementById('pressureInput'),
@@ -183,7 +182,7 @@ const UI = (function () {
         });
 
         // Coordinate Format Selection
-        const fmtSelectors = ['coord_fmt', 'range_fmt_sel', 'dest_fmt_sel', 'mag_fmt_sel', 'gps_fmt_sel'];
+        const fmtSelectors = ['range_fmt_sel', 'dest_fmt_sel', 'mag_fmt_sel', 'gps_fmt_sel'];
         fmtSelectors.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', (e) => _updateFmt(e.target.value));
@@ -313,7 +312,7 @@ const UI = (function () {
      */
     function _updateFmt(val) {
         // Sync all selectors
-        document.querySelectorAll('#coord_fmt, #range_fmt_sel, #dest_fmt_sel, #mag_fmt_sel, #gps_fmt_sel').forEach(el => {
+        document.querySelectorAll('#range_fmt_sel, #dest_fmt_sel, #mag_fmt_sel, #gps_fmt_sel').forEach(el => {
             if (el) el.value = val;
         });
 
@@ -377,7 +376,7 @@ const UI = (function () {
      * @private
      */
     function _createCoordRow(prefix, type) {
-        const fmt = (elements.coordFmt ? elements.coordFmt.value : null) || 'DD';
+        const fmt = SafeStorage.getItem(STORAGE_KEYS.COORD_FMT) || 'DD';
         const labelPrefix = type === 'lat' ? 'Latitude' : 'Longitude';
         let html = `<div class="coord-row" data-prefix="${prefix}" data-type="${type}" role="group" aria-label="${labelPrefix} input">`;
 
@@ -550,7 +549,7 @@ const UI = (function () {
         const row = document.querySelector(`.coord-row[data-prefix="${prefix}"][data-type="${type}"]`);
         if (!row) return;
 
-        const fmt = (elements.coordFmt ? elements.coordFmt.value : null) || 'DD';
+        const fmt = SafeStorage.getItem(STORAGE_KEYS.COORD_FMT) || 'DD';
         const absVal = Math.abs(ddVal);
         const sign = ddVal < 0 ? -1 : 1;
 
@@ -746,24 +745,34 @@ const UI = (function () {
      * @private
      */
     function _formatCoords(lat, lon) {
-        const fmt = elements.coordFmt ? elements.coordFmt.value : 'DD';
+        return `<span class="coord-val">${formatCoord(lat, true)}</span><span class="coord-val">${formatCoord(lon, false)}</span>`;
+    }
 
-        const formatSingle = (val, isLat) => {
-            const abs = Math.abs(val);
-            const deg = Math.floor(abs);
-            const hemi = isLat ? (val >= 0 ? 'N' : 'S') : (val >= 0 ? 'E' : 'W');
+    /**
+     * Formats a single coordinate based on the selected format.
+     * Exported so other modules (like gps.js) can reuse it.
+     * @param {number} deg - Decimal degrees
+     * @param {boolean} isLat - True for Latitude, False for Longitude
+     * @returns {string} Formatted coordinate string
+     */
+    function formatCoord(deg, isLat) {
+        if (isNaN(deg)) return '--';
+        const fmt = SafeStorage.getItem(STORAGE_KEYS.COORD_FMT) || 'DD';
+        const num = Math.abs(deg);
+        const dir = isLat ? (deg >= 0 ? 'N' : 'S') : (deg >= 0 ? 'E' : 'W');
 
-            if (fmt === 'DD') return `${hemi} ${abs.toFixed(5)}°`;
-
-            const minFull = (abs - deg) * 60;
-            if (fmt === 'DDM') return `${hemi} ${deg}° ${minFull.toFixed(4)}'`;
-
-            const min = Math.floor(minFull);
-            const sec = ((minFull - min) * 60).toFixed(2);
-            return `${hemi} ${deg}° ${min}' ${sec}"`;
-        };
-
-        return `<span class="coord-val">${formatSingle(lat, true)}</span><span class="coord-val">${formatSingle(lon, false)}</span>`;
+        if (fmt === 'DD') {
+            return `${num.toFixed(5)}° ${dir}`;
+        } else if (fmt === 'DDM') {
+            const d = Math.floor(num);
+            const m = ((num - d) * 60).toFixed(4);
+            return `${d}° ${m}' ${dir}`;
+        } else { // DMS
+            const d = Math.floor(num);
+            const m = Math.floor((num - d) * 60);
+            const s = ((num - d - m / 60) * 3600).toFixed(2);
+            return `${d}° ${m}' ${s}" ${dir}`;
+        }
     }
 
     // --- Vincenty Calculation ---
@@ -947,7 +956,8 @@ const UI = (function () {
     }
 
     return {
-        init
+        init,
+        formatCoord
     };
 })();
 

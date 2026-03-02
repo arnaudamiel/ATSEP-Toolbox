@@ -1,5 +1,4 @@
-const METERS_PER_DEGREE = 111319.5; // Approx meters per degree of latitude
-const CEP_95_MULTIPLIER = 2.4477; // Multiplier for 95% Circular Error Probable (assuming circular normal distribution)
+// Removed local constants in favor of ATSEP_CONSTANTS
 
 /**
  * Calculates standard deviation for a set of values relative to a mean
@@ -49,12 +48,12 @@ function calculateGPSMetrics(samples) {
 
         // Convert to meters
         // Approximations for latitude and longitude to meters
-        const latMeters = stdDevLat * METERS_PER_DEGREE;
-        const lonMeters = stdDevLon * METERS_PER_DEGREE * Math.cos(avgLat * Math.PI / 180);
+        const latMeters = stdDevLat * ATSEP_CONSTANTS.METERS_PER_DEGREE;
+        const lonMeters = stdDevLon * ATSEP_CONSTANTS.METERS_PER_DEGREE * Math.cos(avgLat * Math.PI / 180);
         stdDev = Math.sqrt(latMeters * latMeters + lonMeters * lonMeters);
 
         // CEP 95% (Circular Error Probable at 95% confidence)
-        cep95 = CEP_95_MULTIPLIER * stdDev;
+        cep95 = ATSEP_CONSTANTS.CEP_95_MULTIPLIER * stdDev;
     }
 
     return {
@@ -94,28 +93,7 @@ egm96Loader.load('WW15MGH.GRD')
         console.error('Failed to load EGM96 grid:', err);
     });
 
-function formatCoord(deg, isLat) {
-    if (isNaN(deg)) return '--';
-    const num = Math.abs(deg);
-    const dir = isLat ? (deg >= 0 ? 'N' : 'S') : (deg >= 0 ? 'E' : 'W');
-
-    // Get globally selected format or fallback to DMS as default
-    const fmtSel = document.getElementById('gps_fmt_sel');
-    const fmt = fmtSel ? fmtSel.value : 'DMS';
-
-    if (fmt === 'DD') {
-        return `${num.toFixed(5)}° ${dir}`;
-    } else if (fmt === 'DDM') {
-        const d = Math.floor(num);
-        const m = ((num - d) * 60).toFixed(4);
-        return `${d}° ${m}' ${dir}`;
-    } else { // DMS
-        const d = Math.floor(num);
-        const m = Math.floor((num - d) * 60);
-        const s = ((num - d - m / 60) * 3600).toFixed(2);
-        return `${d}° ${m}' ${s}" ${dir}`;
-    }
-}
+// formatCoord logic moved to UI module
 
 function updateGPSUI() {
     const metrics = calculateGPSMetrics(gpsSamples);
@@ -134,8 +112,8 @@ function updateGPSUI() {
         return;
     }
 
-    document.getElementById('gps_lat').textContent = formatCoord(metrics.avgLat, true);
-    document.getElementById('gps_lon').textContent = formatCoord(metrics.avgLon, false);
+    document.getElementById('gps_lat').textContent = UI.formatCoord(metrics.avgLat, true);
+    document.getElementById('gps_lon').textContent = UI.formatCoord(metrics.avgLon, false);
 
     // Determine units
     const altUnitSel = document.getElementById('gps_alt_unit');
@@ -200,8 +178,8 @@ function handlePosition(position) {
         const lats = gpsSamples.map(s => s.lat);
         const lons = gpsSamples.map(s => s.lon);
 
-        const latMetersDiff = Math.abs(pos.latitude - metrics.avgLat) * METERS_PER_DEGREE;
-        const lonMetersDiff = Math.abs(pos.longitude - metrics.avgLon) * METERS_PER_DEGREE * Math.cos(metrics.avgLat * Math.PI / 180);
+        const latMetersDiff = Math.abs(pos.latitude - metrics.avgLat) * ATSEP_CONSTANTS.METERS_PER_DEGREE;
+        const lonMetersDiff = Math.abs(pos.longitude - metrics.avgLon) * ATSEP_CONSTANTS.METERS_PER_DEGREE * Math.cos(metrics.avgLat * Math.PI / 180);
         const distFromMean = Math.sqrt(latMetersDiff * latMetersDiff + lonMetersDiff * lonMetersDiff);
 
         // Reject if it's more than 3 standard deviations away

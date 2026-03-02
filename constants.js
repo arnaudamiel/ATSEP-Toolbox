@@ -64,6 +64,12 @@ const ATSEP_CONSTANTS = Object.freeze({
     VINCENTY_B_C3: 74,
     VINCENTY_B_C4: -47,
 
+    // === GPS Specific Constants ===
+    /** Approximation of meters per degree of latitude */
+    METERS_PER_DEGREE: 111319.5,
+    /** Multiplier for 95% Circular Error Probable (assuming circular normal distribution) */
+    CEP_95_MULTIPLIER: 2.4477,
+
     // === Pressure Limits for QNH ===
     // Warning limits from NATS AERONAUTICAL INFORMATION CIRCULAR P 172/2024
     PRESSURE_LIMITS_HPA: Object.freeze({
