@@ -100,26 +100,16 @@ self.addEventListener('fetch', (event) => {
  * Activate event - cleans up old caches.
  * Uses clients.claim() to take control immediately.
  */
-self.addEventListener('activate', (event) => {
-    const cacheWhitelist = [CACHE_NAME];
-
-    event.waitUntil(
-        caches.keys()
-            .then((cacheNames) => {
-                return Promise.all(
-                    cacheNames.map((cacheName) => {
-                        if (cacheWhitelist.indexOf(cacheName) === -1) {
-                            console.log('[SW] Deleting old cache:', cacheName);
-                            return caches.delete(cacheName);
-                        }
-                    })
-                );
-            })
-            .then(() => {
-                console.log('[SW] Claiming clients');
-                return self.clients.claim();
-            })
-    );
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      )
+    ).then(() => self.clients.claim())   // take control immediately
+  );
 });
 
 /**

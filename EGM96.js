@@ -5,42 +5,48 @@ class EGM96Loader {
         this.cols = 1441;
     }
 
-    async load(url) {
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error("Could not find " + url);
-        // Fetch as ArrayBuffer to check magic bytes
-        const buffer = await resp.arrayBuffer();
-        const view = new Uint8Array(buffer);
-        let text;
+    async load(url, onProgress) {
+        try {
+            onProgress?.('loading');
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error("Could not find " + url);
 
-        // Check for gzip magic numbers: 0x1F, 0x8B
-        if (view.length >= 2 && view[0] === 0x1F && view[1] === 0x8B && typeof DecompressionStream !== 'undefined') {
+            // Fetch as stream for decompression
             const ds = new DecompressionStream('gzip');
-            const stream = new Response(buffer).body.pipeThrough(ds);
-            text = await new Response(stream).text();
-        } else {
-            // Either not gzipped (server auto-decompressed) or browser doesn't support DecompressionStream
-            text = new TextDecoder().decode(buffer);
-        }
+            const decompressed = resp.body.pipeThrough(ds);
+            const reader = decompressed.getReader();
+            const chunks = [];
+            const decoder = new TextDecoder();
+            let text = '';
 
-        // Parse ASCII grid file
-        const lines = text.split(/\r?\n/);
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                text += decoder.decode(value, { stream: true });
+            }
+            text += decoder.decode(); // final flush
 
-        // Skip header line and parse values
-        this.grid = [];
-        let valueIndex = 0;
+            // Parse ASCII grid file
+            const lines = text.split(/\r?\n/);
 
-        for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].trim().split(/\s+/).filter(v => v.length > 0);
-            for (let v of values) {
-                const num = parseFloat(v);
-                if (!isNaN(num)) {
-                    this.grid.push(num);
+            // Skip header line and parse values
+            this.grid = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].trim().split(/\s+/).filter(v => v.length > 0);
+                for (let v of values) {
+                    const num = parseFloat(v);
+                    if (!isNaN(num)) {
+                        this.grid.push(num);
+                    }
                 }
             }
-        }
 
-        return true;
+            onProgress?.('ready');
+            return true;
+        } catch (err) {
+            onProgress?.('error', err.message);
+            throw err;
+        }
     }
 
     getN(lat, lon) {

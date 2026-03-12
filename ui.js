@@ -115,6 +115,35 @@ const UI = (function () {
         _updateDependentUI();
         _initEasterEgg();
         _initWMMHR();
+        _initGPS();
+    }
+
+    /**
+     * Updates the status message for a specific tab.
+     * @param {string} tabId - The ID of the tab ('gps', 'mag', etc.)
+     * @param {string} status - The status code ('loading', 'ready', 'error')
+     * @param {string} [msg] - Optional custom message
+     * @private
+     */
+    function _setTabStatus(tabId, status, msg) {
+        let elId;
+        if (tabId === 'gps') elId = 'gps_status';
+        else if (tabId === 'mag') elId = 'mag_res';
+        else return;
+
+        const el = document.getElementById(elId);
+        if (!el) return;
+
+        if (status === 'loading') {
+            el.textContent = msg || (tabId === 'gps' ? "Loading geoid model..." : "Loading magnetic model...");
+            el.className = "warning-text text-center mb-half";
+        } else if (status === 'ready') {
+            el.textContent = msg || (tabId === 'gps' ? "Ready to start" : "Ready");
+            el.className = tabId === 'gps' ? "warning-text text-center mb-half" : "result-success text-center mb-half";
+        } else if (status === 'error') {
+            el.textContent = msg || "Error loading data.";
+            el.className = "result-error text-center mb-half";
+        }
     }
 
     /**
@@ -181,11 +210,40 @@ const UI = (function () {
             btn.addEventListener('click', (e) => _switchTab(e.currentTarget));
         });
 
-        // Coordinate Format Selection
+        // Coordinate Format Reactive State Setup
+        const coordFormatListeners = new Set();
+        UI.onCoordFormatChange = (fn) => {
+            coordFormatListeners.add(fn);
+            return () => coordFormatListeners.delete(fn);
+        };
+
+        UI.setCoordFormat = (fmt) => {
+            SafeStorage.setItem(STORAGE_KEYS.COORD_FMT, fmt);
+            SafeStorage.setItem('range_fmt_sel', fmt);
+            SafeStorage.setItem('dest_fmt_sel', fmt);
+            SafeStorage.setItem('mag_fmt_sel', fmt);
+            SafeStorage.setItem('gps_fmt_sel', fmt);
+            coordFormatListeners.forEach(fn => fn(fmt));
+        };
+
         const fmtSelectors = ['range_fmt_sel', 'dest_fmt_sel', 'mag_fmt_sel', 'gps_fmt_sel'];
         fmtSelectors.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.addEventListener('change', (e) => _updateFmt(e.target.value));
+            if (el) {
+                el.addEventListener('change', (e) => UI.setCoordFormat(e.target.value));
+                UI.onCoordFormatChange(fmt => { el.value = fmt; });
+            }
+        });
+
+        // Register renderer for inputs
+        UI.onCoordFormatChange(() => _updateDependentUI());
+
+        // Register calculation re-runs
+        UI.onCoordFormatChange(() => {
+            if (elements.rangeRes && elements.rangeRes.innerText !== '---') _runRange();
+            if (elements.destRes && elements.destRes.innerText !== '---') _runDest();
+            if (elements.magRes && elements.magRes.innerText !== '---') _runMag();
+            if (typeof window.updateGPSUI === 'function') window.updateGPSUI();
         });
 
         // Unit Selection
@@ -305,31 +363,6 @@ const UI = (function () {
         });
     }
 
-    /**
-     * Update coordinate format across all selectors.
-     * @param {string} val - The format value ('DD', 'DDM', 'DMS')
-     * @private
-     */
-    function _updateFmt(val) {
-        // Sync all selectors
-        document.querySelectorAll('#range_fmt_sel, #dest_fmt_sel, #mag_fmt_sel, #gps_fmt_sel').forEach(el => {
-            if (el) el.value = val;
-        });
-
-        SafeStorage.setItem(STORAGE_KEYS.COORD_FMT, val);
-        SafeStorage.setItem('range_fmt_sel', val);
-        SafeStorage.setItem('dest_fmt_sel', val);
-        SafeStorage.setItem('mag_fmt_sel', val);
-        SafeStorage.setItem('gps_fmt_sel', val);
-
-        _updateDependentUI();
-
-        // Re-run calculations to update displayed results to the new format directly
-        if (elements.rangeRes && elements.rangeRes.innerText !== '---') _runRange();
-        if (elements.destRes && elements.destRes.innerText !== '---') _runDest();
-        if (elements.magRes && elements.magRes.innerText !== '---') _runMag();
-        if (typeof window.updateGPSUI === 'function') window.updateGPSUI();
-    }
 
     /**
      * Update distance unit across all selectors.
@@ -867,11 +900,35 @@ const UI = (function () {
             return;
         }
 
+        WMMHR.load((status, err) => {
+            if (status === 'loading') _setTabStatus('mag', 'loading');
+            else if (status === 'ready') _setTabStatus('mag', 'ready');
+            else if (status === 'error') _setTabStatus('mag', 'error', `Failed to load WMMHR: ${err}`);
+        }).catch(() => {});
+    }
+
+    /**
+     * Initializes GPS tab and EGM96 loading.
+     * @private
+     */
+    async function _initGPS() {
+        if (typeof egm96Loader === 'undefined') {
+            console.warn("egm96Loader not found");
+            return;
+        }
+
         try {
-            await WMMHR.load('WMMHR.COF.gz');
-            console.log("WMMHR Initialized via UI");
+            await egm96Loader.load('WW15MGH.GRD.gz', (status, err) => {
+                if (status === 'loading') _setTabStatus('gps', 'loading');
+                else if (status === 'ready') {
+                    isEgm96Loaded = true;
+                    _setTabStatus('gps', 'ready');
+                } else if (status === 'error') {
+                    _setTabStatus('gps', 'error', `Geoid load failed: ${err}`);
+                }
+            });
         } catch (e) {
-            console.warn("WMMHR.COF fetch failed/init error", e);
+            console.error("EGM96 load failed", e);
         }
     }
 

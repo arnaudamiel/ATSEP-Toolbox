@@ -30,30 +30,32 @@ const WMMHR = (function () {
      * @param {string} url - The URL to the WMMHR.COF file (default: 'WMMHR.COF.gz')
      * @returns {Promise<void>}
      */
-    async function load(url = 'WMMHR.COF.gz') {
+    async function load(onProgress, url = 'WMMHR.COF.gz') {
         if (initialized) return;
 
         try {
+            onProgress?.('loading');
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Failed to load WMMHR data: ${response.status}`);
 
-            // Fetch as ArrayBuffer to check magic bytes
-            const buffer = await response.arrayBuffer();
-            const view = new Uint8Array(buffer);
-            let data;
+            // Fetch as stream for decompression
+            const ds = new DecompressionStream('gzip');
+            const decompressed = response.body.pipeThrough(ds);
+            const reader = decompressed.getReader();
+            const decoder = new TextDecoder();
+            let data = '';
 
-            // Check for gzip magic numbers: 0x1F, 0x8B
-            if (view.length >= 2 && view[0] === 0x1F && view[1] === 0x8B && typeof DecompressionStream !== 'undefined') {
-                const ds = new DecompressionStream('gzip');
-                const stream = new Response(buffer).body.pipeThrough(ds);
-                data = await new Response(stream).text();
-            } else {
-                // Either not gzipped (server auto-decompressed) or browser doesn't support DecompressionStream
-                data = new TextDecoder().decode(buffer);
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                data += decoder.decode(value, { stream: true });
             }
+            data += decoder.decode(); // final flush
 
             _parse(data);
+            onProgress?.('ready');
         } catch (error) {
+            onProgress?.('error', error.message);
             console.error("WMMHR Load Error:", error);
             throw error;
         }

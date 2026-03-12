@@ -83,15 +83,7 @@ let isEgm96Loaded = false;
 // iOS detection: iPhones naturally provide altitude relative to MSL
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-// Attempt to load the grid data asynchronously
-egm96Loader.load('WW15MGH.GRD.gz')
-    .then(() => {
-        isEgm96Loaded = true;
-        console.log('EGM96 Geoid grid loaded successfully');
-    })
-    .catch(err => {
-        console.error('Failed to load EGM96 grid:', err);
-    });
+// EGM96 initialization is now managed by UI module to provide feedback
 
 // formatCoord logic moved to UI module
 
@@ -254,7 +246,7 @@ window.startAveraging = function () {
 
     gpsWatchId = navigator.geolocation.watchPosition(handlePosition, handleGPSError, {
         enableHighAccuracy: true,
-        timeout: 5000,
+        timeout: 10000,
         maximumAge: 0
     });
 

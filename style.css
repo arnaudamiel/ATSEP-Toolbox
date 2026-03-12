@@ -708,3 +708,89 @@ body {
         padding: 0.1rem 0.5rem;
     }
 }
+
+/* === Update Banner === */
+.update-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(45, 55, 72, 0.85); /* Slate with transparency */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--color-blue-500);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.update-banner-content {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.update-banner-icon {
+    font-size: 1.2rem;
+    animation: pulse 2s infinite;
+}
+
+.update-banner-text {
+    font-weight: 600;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.update-banner-btn {
+    background-color: var(--color-blue-500);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all var(--transition-fast);
+}
+
+.update-banner-btn:hover {
+    background-color: var(--color-blue-600);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 179, 237, 0.3);
+}
+
+.update-banner-btn:active {
+    transform: translateY(0);
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 500px) {
+    .update-banner-content {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        text-align: center;
+    }
+    
+    .update-banner-text {
+        font-size: 0.85rem;
+    }
+    
+    .update-banner-btn {
+        width: 100%;
+        padding: 0.6rem;
+    }
+}
