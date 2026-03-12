@@ -1,4 +1,6 @@
-// Removed local constants in favor of ATSEP_CONSTANTS
+import { ATSEP_CONSTANTS } from '../constants.js';
+import { EGM96Loader } from '../EGM96.js';
+import { setTabStatus, formatCoord } from './shared-ui.js';
 
 /**
  * Calculates standard deviation for a set of values relative to a mean
@@ -83,9 +85,21 @@ let isEgm96Loaded = false;
 // iOS detection: iPhones naturally provide altitude relative to MSL
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-// EGM96 initialization is now managed by UI module to provide feedback
-
-// formatCoord logic moved to UI module
+async function initGPSData() {
+    try {
+        await egm96Loader.load('WW15MGH.GRD.gz', (status, err) => {
+            if (status === 'loading') setTabStatus('gps', 'loading');
+            else if (status === 'ready') {
+                isEgm96Loaded = true;
+                setTabStatus('gps', 'ready');
+            } else if (status === 'error') {
+                setTabStatus('gps', 'error', `Geoid load failed: ${err}`);
+            }
+        });
+    } catch (e) {
+        console.error("EGM96 load failed", e);
+    }
+}
 
 function updateGPSUI() {
     const metrics = calculateGPSMetrics(gpsSamples);
@@ -104,8 +118,8 @@ function updateGPSUI() {
         return;
     }
 
-    document.getElementById('gps_lat').textContent = UI.formatCoord(metrics.avgLat, true);
-    document.getElementById('gps_lon').textContent = UI.formatCoord(metrics.avgLon, false);
+    document.getElementById('gps_lat').textContent = formatCoord(metrics.avgLat, true);
+    document.getElementById('gps_lon').textContent = formatCoord(metrics.avgLon, false);
 
     // Determine units
     const altUnitSel = document.getElementById('gps_alt_unit');
@@ -114,7 +128,7 @@ function updateGPSUI() {
     const unitLabel = isFeet ? 'ft' : 'm';
 
     // Use conversion factor from constants
-    const convert = (val) => isFeet ? val * (typeof ATSEP_CONSTANTS !== 'undefined' ? ATSEP_CONSTANTS.METERS_TO_FEET : 3.28084) : val;
+    const convert = (val) => isFeet ? val * ATSEP_CONSTANTS.METERS_TO_FEET : val;
     const formatVal = (val) => isFeet ? Math.round(convert(val)).toString() : convert(val).toFixed(1);
 
     // Display Height
@@ -222,7 +236,7 @@ function updateElapsedTime() {
     document.getElementById('gps_elapsed').textContent = `${mins}m ${secs}s`;
 }
 
-window.startAveraging = function () {
+function startAveraging() {
     if (!navigator.geolocation) {
         const errorEl = document.getElementById('gps_error');
         errorEl.classList.remove('hidden');
@@ -251,9 +265,9 @@ window.startAveraging = function () {
     });
 
     gpsElapsedTimer = setInterval(updateElapsedTime, 1000);
-};
+}
 
-window.stopAveraging = function () {
+function stopAveraging() {
     if (gpsWatchId !== null) {
         navigator.geolocation.clearWatch(gpsWatchId);
         gpsWatchId = null;
@@ -274,9 +288,9 @@ window.stopAveraging = function () {
         document.getElementById('gps_status').textContent = "Ready to start";
         document.getElementById('gps_status').className = "warning-text text-center mb-half";
     }
-};
+}
 
-window.resetData = function () {
+function resetData() {
     gpsSamples = [];
     gpsRejectedCount = 0;
     gpsStartTime = null;
@@ -294,21 +308,21 @@ window.resetData = function () {
     document.getElementById('qualityValue').textContent = '--';
     document.getElementById('qualityValue').className = 'result-positive';
     document.getElementById('qualityLabel').textContent = 'Waiting to start...';
-};
+}
 
-window.updateGPSUI = updateGPSUI;
+export function initGps() {
+    initGPSData(); // Eagerly load EGM96
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Attach event listeners to buttons using the functions defined above
     const startBtn = document.getElementById('startGpsBtn');
     const stopBtn = document.getElementById('stopGpsBtn');
     const resetBtn = document.getElementById('resetGpsBtn');
-
-    // Add event listener for altitude unit change
     const altUnitSel = document.getElementById('gps_alt_unit');
 
-    if (startBtn) startBtn.addEventListener('click', window.startAveraging);
-    if (stopBtn) stopBtn.addEventListener('click', window.stopAveraging);
-    if (resetBtn) resetBtn.addEventListener('click', window.resetData);
-    if (altUnitSel) altUnitSel.addEventListener('change', window.updateGPSUI);
-});
+    if (startBtn) startBtn.addEventListener('click', startAveraging);
+    if (stopBtn) stopBtn.addEventListener('click', stopAveraging);
+    if (resetBtn) resetBtn.addEventListener('click', resetData);
+    if (altUnitSel) altUnitSel.addEventListener('change', updateGPSUI);
+
+    // Provide generic hook for shared-ui format change redraw
+    window.updateGPSUI = updateGPSUI;
+}

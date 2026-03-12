@@ -4,21 +4,23 @@
  * UI logic is handled in ui.js
  */
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => {
-            console.log('SW registered with scope:', reg.scope);
+export function initApp() {
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+                console.log('SW registered with scope:', reg.scope);
 
-            reg.addEventListener('updatefound', () => {
-                const newWorker = reg.installing;
-                newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        showUpdateBanner();
-                    }
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            showUpdateBanner();
+                        }
+                    });
                 });
-            });
-        }).catch(err => console.log('SW registration failed:', err));
-    });
+            }).catch(err => console.log('SW registration failed:', err));
+        });
+    }
 }
 
 /**

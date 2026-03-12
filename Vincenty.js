@@ -15,34 +15,27 @@
  * @author ATSEP Toolbox
  */
 
-const Vincenty = (function () {
-    // Use shared constants if available, otherwise use local definitions
-    const a = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.WGS84_A : 6378137.0;
-    const b = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.WGS84_B : 6356752.314245;
-    const f = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.WGS84_F : 1 / 298.257223563;
+import { ATSEP_CONSTANTS, ERROR_MESSAGES } from './constants.js';
 
-    const CONVERGENCE_THRESHOLD = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.VINCENTY_CONVERGENCE : 1e-12;
-    const MAX_ITERATIONS = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.VINCENTY_MAX_ITERATIONS : 100;
+export const Vincenty = (function () {
+    const a = ATSEP_CONSTANTS.WGS84_A;
+    const b = ATSEP_CONSTANTS.WGS84_B;
+    const f = ATSEP_CONSTANTS.WGS84_F;
 
-    /**
-     * Vincenty's expansion coefficients (Helmert's series).
-     * These are numerators of the Taylor series expansion for the geodesic distance,
-     * scaled to power-of-two denominators (2^14 and 2^10) to maintain integer
-     * accuracy in the original 1975 derivation.
-     */
-    const A_DENOM = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_A_DENOM : 16384;
-    const A_C1 = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_A_C1 : 4096;
-    const A_C2 = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_A_C2 : -768;
-    const A_C3 = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_A_C3 : 320;
-    const A_C4 = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_A_C4 : -175;
+    const CONVERGENCE_THRESHOLD = ATSEP_CONSTANTS.VINCENTY_CONVERGENCE;
+    const MAX_ITERATIONS = ATSEP_CONSTANTS.VINCENTY_MAX_ITERATIONS;
 
-    const B_DENOM = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_B_DENOM : 1024;
-    const B_C1 = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_B_C1 : 256;
-    const B_C2 = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_B_C2 : -128;
-    const B_C3 = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_B_C3 : 74;
-    const B_C4 = (typeof ATSEP_CONSTANTS !== 'undefined') ? ATSEP_CONSTANTS.VINCENTY_B_C4 : -47;
+    const A_DENOM = ATSEP_CONSTANTS.VINCENTY_A_DENOM;
+    const A_C1 = ATSEP_CONSTANTS.VINCENTY_A_C1;
+    const A_C2 = ATSEP_CONSTANTS.VINCENTY_A_C2;
+    const A_C3 = ATSEP_CONSTANTS.VINCENTY_A_C3;
+    const A_C4 = ATSEP_CONSTANTS.VINCENTY_A_C4;
+
+    const B_DENOM = ATSEP_CONSTANTS.VINCENTY_B_DENOM;
+    const B_C1 = ATSEP_CONSTANTS.VINCENTY_B_C1;
+    const B_C2 = ATSEP_CONSTANTS.VINCENTY_B_C2;
+    const B_C3 = ATSEP_CONSTANTS.VINCENTY_B_C3;
+    const B_C4 = ATSEP_CONSTANTS.VINCENTY_B_C4;
 
     /**
      * Converts degrees to radians
@@ -127,9 +120,7 @@ const Vincenty = (function () {
         }
 
         if (iterLimit === 0) {
-            const msg = (typeof ERROR_MESSAGES !== 'undefined')
-                ? ERROR_MESSAGES.CONVERGENCE_FAILED
-                : "Formula failed to converge";
+            const msg = ERROR_MESSAGES.CONVERGENCE_FAILED;
             throw new Error(msg);
         }
 
@@ -229,9 +220,7 @@ const Vincenty = (function () {
 
         // === Step 3: Check for convergence failure (antipodal points) ===
         if (iterLimit === 0) {
-            const msg = (typeof ERROR_MESSAGES !== 'undefined')
-                ? ERROR_MESSAGES.ANTIPODAL_POINTS
-                : "Antipodal Limit reached (Points are nearly opposite)";
+            const msg = ERROR_MESSAGES.ANTIPODAL_POINTS;
             throw new Error(msg);
         }
 

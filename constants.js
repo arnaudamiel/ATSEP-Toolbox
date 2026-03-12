@@ -6,7 +6,7 @@
  * used across the application to ensure consistency and maintainability.
  */
 
-const ATSEP_CONSTANTS = Object.freeze({
+export const ATSEP_CONSTANTS = Object.freeze({
     // === Pressure Conversion ===
     /** Standard conversion factor: inches of mercury to hectopascals */
     INHG_TO_HPA: 33.86389,
@@ -89,7 +89,7 @@ const ATSEP_CONSTANTS = Object.freeze({
 /**
  * Standardized error messages for the application
  */
-const ERROR_MESSAGES = Object.freeze({
+export const ERROR_MESSAGES = Object.freeze({
     INVALID_PRESSURE: 'Please enter a valid positive pressure value.',
     PRESSURE_OUT_OF_RANGE: 'Pressure outside realistic limits (850-1100 hPa).',
     INVALID_COORDINATE: 'Invalid coordinate value.',
@@ -106,7 +106,7 @@ const ERROR_MESSAGES = Object.freeze({
 /**
  * Storage keys for localStorage
  */
-const STORAGE_KEYS = Object.freeze({
+export const STORAGE_KEYS = Object.freeze({
     ACTIVE_TAB: 'active_tab',
     COORD_FMT: 'coord_fmt',
     RANGE_UNIT: 'range_unit_type',

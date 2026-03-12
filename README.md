@@ -32,7 +32,7 @@ Uses **Vincenty's Formulae** on the WGS-84 ellipsoid, providing distance and bea
 * **Model Accuracy:** Uses the **World Magnetic Model High Resolution (WMMHR2025)** for high-precision magnetic variation calculations.
 * **Secular Variation:** Provides the rate of change for magnetic declination (degrees per year).
 * **Uncertainty Estimates:** Displays model uncertainty based on location and date.
-* **Epoch Validation:** Includes built-in checks for model epoch validity (currently 2025.0).
+* **Epoch Validation:** Includes built-in checks for model epoch validity (currently 2025 - 2030).
 * **Reference:** Based on [NCEI World Magnetic Model High Resolution](https://www.ncei.noaa.gov/products/world-magnetic-model-high-resolution).
 
 ### 4. Precision GPS Averager & Geoid Separation
@@ -87,7 +87,14 @@ ATSEP-Toolbox/
 ├── WMMHR.COF.gz    # High-resolution magnetic model coefficients (compressed)
 ├── EGM96.js        # EGM96 geoid calculation module
 ├── WW15MGH.GRD.gz  # EGM96 interpolation grid data (compressed)
-├── ui.js           # UI controller (DOM, events, validation)
+├── ui/             # Feature-specific ES modules for UI
+│   ├── shared-ui.js
+│   ├── qnh-ui.js
+│   ├── range-ui.js
+│   ├── dest-ui.js
+│   ├── magvar-ui.js
+│   └── gps-ui.js
+├── ui.js           # Main ES module entry point
 ├── app.js          # PWA service worker registration
 ├── sw.js           # Service worker for offline support
 ├── manifest.json   # PWA manifest with shortcuts
@@ -103,7 +110,8 @@ ATSEP-Toolbox/
 | `QNH.js`       | Pure atmospheric calculations - no dependencies on UI                                            |
 | `wmmhr.js`     | World Magnetic Model High Resolution calculations                                                |
 | `EGM96.js`     | EGM96 Geoid Separation calculations                                                              |
-| `ui.js`        | All DOM manipulation, event handling, and input validation                                       |
+| `ui/`          | Directory containing feature-isolated ES modules for UI controllers (`qnh-ui.js`, etc.)          |
+| `ui.js`        | Main ES module entry point that orchestrates the UI modules and global DOM listeners             |
 | `app.js`       | Service worker registration only                                                                 |
 
 ### Standards and Models Compliance
@@ -185,7 +193,7 @@ Contributions are welcome! Please ensure any PRs:
 
 ### Code Style
 
-- Use ES6+ features
+- 
 - Prefer `const` over `let`
 - Use meaningful variable names
 - Add JSDoc comments for all public functions

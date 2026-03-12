@@ -4,7 +4,7 @@
  * Suitable for expansion up to degree 133.
  */
 
-const WMMHR = (function () {
+export const WMMHR = (function () {
     // WGS-84 Ellipsoid Constants
     const a = 6378.137;           // Semi-major axis (km)
     const f = 1.0 / 298.257223563; // Flattening

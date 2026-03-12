@@ -40,9 +40,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="style.css">
+    <!-- Application Entry Point -->
+    <script type="module" src="ui.js"></script>
 </head>
 
 <body>
@@ -322,19 +325,7 @@
         </div>
     </main>
 
-    <!-- Shared Constants (must load first) -->
-    <script src="constants.js"></script>
-
-    <!-- Computation Modules -->
-    <script src="Vincenty.js"></script>
-    <script src="QNH.js"></script>
-    <script src="wmmhr.js"></script>
-    <script src="EGM96.js"></script>
-    <script src="gps.js"></script>
-
     <!-- Application Logic -->
-    <script src="ui.js"></script>
-    <script src="app.js"></script>
 </body>
 
 </html>

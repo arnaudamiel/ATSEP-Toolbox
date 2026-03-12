@@ -12,40 +12,27 @@
  * @author ATSEP Toolbox
  */
 
-const QNH = (function () {
-    // Use shared constants if available, otherwise use local definitions
-    const STANDARD_PRESSURE_HPA = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.STANDARD_PRESSURE_HPA : 1013.25;
-    const INHG_TO_HPA = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.INHG_TO_HPA : 33.86389;
-    const FEET_TO_METERS = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.FEET_TO_METERS : 0.3048;
+import { ATSEP_CONSTANTS, ERROR_MESSAGES } from './constants.js';
+
+export const QNH = (function () {
+    const STANDARD_PRESSURE_HPA = ATSEP_CONSTANTS.STANDARD_PRESSURE_HPA;
+    const INHG_TO_HPA = ATSEP_CONSTANTS.INHG_TO_HPA;
+    const FEET_TO_METERS = ATSEP_CONSTANTS.FEET_TO_METERS;
 
     /** Sea level standard temperature in Kelvin (15°C) */
-    const T0 = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.STANDARD_TEMP_K : 288.15;
+    const T0 = ATSEP_CONSTANTS.STANDARD_TEMP_K;
 
     /** Standard temperature lapse rate in K/m (6.5 K/km) */
-    const L = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.TEMP_LAPSE_RATE : 0.0065;
+    const L = ATSEP_CONSTANTS.TEMP_LAPSE_RATE;
 
     /** Gravitational acceleration in m/s² */
-    const g = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.GRAVITY : 9.80665;
+    const g = ATSEP_CONSTANTS.GRAVITY;
 
     /** Specific gas constant for dry air in J/(kg·K) */
-    const Rs = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.GAS_CONSTANT_DRY_AIR : 287.05287;
+    const Rs = ATSEP_CONSTANTS.GAS_CONSTANT_DRY_AIR;
 
     /** Pressure limits for validation */
-    const PRESSURE_LIMITS_HPA = (typeof ATSEP_CONSTANTS !== 'undefined')
-        ? ATSEP_CONSTANTS.PRESSURE_LIMITS_HPA
-        : {
-            hardMin: 850,
-            hardMax: 1100,
-            warningMin: 920,
-            warningMax: 1060
-        };
+    const PRESSURE_LIMITS_HPA = ATSEP_CONSTANTS.PRESSURE_LIMITS_HPA;
 
     /**
      * Calculates the altitude correction based on QNH pressure.
@@ -84,9 +71,7 @@ const QNH = (function () {
     function calculate(rawValue, inputUnit, outputUnit) {
         // Validate input
         if (isNaN(rawValue) || rawValue <= 0) {
-            const msg = (typeof ERROR_MESSAGES !== 'undefined')
-                ? ERROR_MESSAGES.INVALID_PRESSURE
-                : "Invalid pressure value";
+            const msg = ERROR_MESSAGES.INVALID_PRESSURE;
             return { error: true, msg: msg };
         }
 
@@ -95,9 +80,7 @@ const QNH = (function () {
 
         // Validate pressure range
         if (pressureInHPa < PRESSURE_LIMITS_HPA.hardMin || pressureInHPa > PRESSURE_LIMITS_HPA.hardMax) {
-            const msg = (typeof ERROR_MESSAGES !== 'undefined')
-                ? ERROR_MESSAGES.PRESSURE_OUT_OF_RANGE
-                : "Pressure outside realistic limits";
+            const msg = ERROR_MESSAGES.PRESSURE_OUT_OF_RANGE;
             return { error: true, msg: msg };
         }
 

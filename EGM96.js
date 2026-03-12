@@ -1,4 +1,4 @@
-class EGM96Loader {
+export class EGM96Loader {
     constructor() {
         this.grid = null;
         this.rows = 721;
