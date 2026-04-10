@@ -6,26 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ATSEP Toolbox - Aviation Tools for ATC Engineers</title>
 
-    <!-- SEO Meta Tags -->
+    <!-- SEO -->
     <meta name="description"
         content="Offline-capable PWA for ATSEPs: QNH correction, geodesic distance, magnetic variation, and precision GPS averaging. Compliant with ICAO Doc 7488/3 and WMMHR2025.">
     <meta name="keywords"
         content="ATC, ATSEP, aviation, PWA, QNH, geodesic, Vincenty, navigation, magnetic variation, WMMHR, flight level, bearing, distance calculator">
     <meta name="author" content="Arnaud Amiel">
     <link rel="canonical" href="https://arnaudamiel.github.io/ATSEP-Toolbox/">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:title"       content="ATSEP Toolbox">
-    <meta property="og:description" content="Aviation calculation tools for ATC Engineers — works fully offline.">
-    <meta property="og:image"       content="https://arnaudamiel.github.io/ATSEP-Toolbox/icon-512.png">
-    <meta property="og:url"         content="https://arnaudamiel.github.io/ATSEP-Toolbox">
-    <meta property="og:type"        content="website">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="ATSEP Toolbox">
-    <meta name="twitter:description" content="Professional aviation tools for ATC Engineers">
-    <meta name="twitter:image" content="https://arnaudamiel.github.io/ATSEP-Toolbox/icon-512.png">
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -36,50 +23,39 @@
     <meta name="apple-mobile-web-app-title" content="ATSEP">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
-    <!-- Fonts - Optimized loading -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
 
-    <!-- Styles -->
-    <!-- Application Entry Point -->
+    <link rel="stylesheet" href="style.css">
     <script type="module" src="ui.js"></script>
 </head>
 
 <body>
-    <!-- Skip link for accessibility -->
     <a href="#qnh-panel" class="visually-hidden focus-visible">Skip to main content</a>
 
     <main>
         <div class="calculator-card">
+
             <nav class="tab-nav" role="tablist" aria-label="Calculator tools">
-                <button class="tab-btn active" data-tab="qnh-panel" role="tab" aria-selected="true"
-                    aria-controls="qnh-panel">QNH</button>
-                <button class="tab-btn" data-tab="range-panel" role="tab" aria-selected="false"
-                    aria-controls="range-panel">RANGE</button>
-                <button class="tab-btn" data-tab="dest-panel" role="tab" aria-selected="false"
-                    aria-controls="dest-panel">DEST</button>
-                <button class="tab-btn" data-tab="mag-panel" role="tab" aria-selected="false"
-                    aria-controls="mag-panel">MAG VAR</button>
-                <button class="tab-btn" data-tab="gps-panel" role="tab" aria-selected="false"
-                    aria-controls="gps-panel">GPS</button>
+                <button class="tab-btn active" data-tab="qnh-panel"   role="tab" aria-selected="true"  aria-controls="qnh-panel">QNH</button>
+                <button class="tab-btn"         data-tab="range-panel" role="tab" aria-selected="false" aria-controls="range-panel">RANGE</button>
+                <button class="tab-btn"         data-tab="dest-panel"  role="tab" aria-selected="false" aria-controls="dest-panel">DEST</button>
+                <button class="tab-btn"         data-tab="mag-panel"   role="tab" aria-selected="false" aria-controls="mag-panel">MAG VAR</button>
+                <button class="tab-btn"         data-tab="gps-panel"   role="tab" aria-selected="false" aria-controls="gps-panel">GPS</button>
             </nav>
 
-            <!-- Global Settings (Hidden, used by JS) -->
             <!-- QNH Panel -->
             <section id="qnh-panel" class="tab-panel active" role="tabpanel" aria-labelledby="qnh-tab">
                 <h1 class="text-3xl font-bold mb-2 app-title">QNH Correction</h1>
 
                 <div class="input-group">
-                    <label for="pressureInput" class="block text-sm font-medium text-gray-400">Pressure Setting
-                        (QNH)</label>
+                    <label for="pressureInput" class="block text-sm font-medium text-gray-400">Pressure Setting (QNH)</label>
                     <div class="flex items-center space-x-2">
                         <input type="number" id="pressureInput" class="input-field flex-grow save-val"
                             placeholder="e.g., 1005" inputmode="decimal" aria-label="Pressure value" required min="0">
-                        <select id="pressureUnit" class="input-field w-auto text-sm save-val"
-                            aria-label="Select pressure unit">
+                        <select id="pressureUnit" class="input-field w-auto text-sm save-val" aria-label="Select pressure unit">
                             <option value="hPa">hPa</option>
                             <option value="inHg">inHg</option>
                         </select>
@@ -88,16 +64,14 @@
 
                 <div class="input-group">
                     <label for="correctionUnit" class="block text-sm font-medium text-gray-400">Display Units</label>
-                    <select id="correctionUnit" class="input-field w-full text-sm save-val"
-                        aria-label="Select correction output unit">
+                    <select id="correctionUnit" class="input-field w-full text-sm save-val" aria-label="Select correction output unit">
                         <option value="FL">FL (Flight Level)</option>
                         <option value="feet">Feet</option>
                         <option value="meters">Meters</option>
                     </select>
                 </div>
 
-                <button id="calculateButton" type="button" class="calculate-btn w-full mt-6">Calculate
-                    Correction</button>
+                <button id="calculateButton" type="button" class="calculate-btn w-full mt-6">Calculate Correction</button>
 
                 <div id="resultDisplay" class="result-box mt-6" role="status" aria-live="polite">
                     Enter pressure to get the correction.
@@ -107,6 +81,7 @@
             <!-- Range and Bearing Panel -->
             <section id="range-panel" class="tab-panel" role="tabpanel" aria-labelledby="range-tab">
                 <h1 class="text-3xl font-bold mb-2 app-title">Range and Bearing Calculator</h1>
+
                 <div class="label-row">
                     <span id="range-coords-label">Coordinates</span>
                     <div>
@@ -127,8 +102,8 @@
                 <div id="r_origin_inputs" class="input-group mb-half" aria-labelledby="range-coords-label"></div>
 
                 <div class="swap-container">
-                    <button id="swapRangeBtn" class="swap-icon-btn" type="button" title="Swap Origin and Destination"
-                        aria-label="Swap origin and destination coordinates">
+                    <button id="swapRangeBtn" class="swap-icon-btn" type="button"
+                        title="Swap Origin and Destination" aria-label="Swap origin and destination coordinates">
                         <span aria-hidden="true">⇅</span>
                     </button>
                 </div>
@@ -145,6 +120,7 @@
             <!-- Destination Panel -->
             <section id="dest-panel" class="tab-panel" role="tabpanel" aria-labelledby="dest-tab">
                 <h1 class="text-3xl font-bold mb-2 app-title">Destination Calculator</h1>
+
                 <div class="label-row">
                     <span id="dest-origin-label">Origin Point</span>
                     <label for="dest_fmt_sel" class="visually-hidden">Coordinate format</label>
@@ -190,6 +166,7 @@
             <!-- Magnetic Variation Panel -->
             <section id="mag-panel" class="tab-panel" role="tabpanel" aria-labelledby="mag-tab">
                 <h1 class="text-3xl font-bold mb-2 app-title">Magnetic Variation</h1>
+
                 <div class="label-row">
                     <span id="mag-origin-label">Location</span>
                     <label for="mag_fmt_sel" class="visually-hidden">Coordinate format</label>
@@ -217,9 +194,10 @@
                 </div>
             </section>
 
-            <!-- GPS Panel -->
+            <!-- GPS Averager Panel -->
             <section id="gps-panel" class="tab-panel" role="tabpanel" aria-labelledby="gps-tab">
                 <h1 class="text-3xl font-bold mb-2 app-title">Precision GPS Averager</h1>
+
                 <div class="label-row mb-2">
                     <span id="gps-fmt-label">Display Options</span>
                     <div>
@@ -236,8 +214,8 @@
                         </select>
                     </div>
                 </div>
-                <p class="text-gray-400 mb-2" style="font-size: 0.9rem; margin-top: -0.5rem;">Maximum accuracy from your
-                    phone</p>
+
+                <p class="text-gray-400 mb-2" style="font-size: 0.9rem; margin-top: -0.5rem;">Maximum accuracy from your phone</p>
 
                 <div id="qualityIndicator" class="result-box mb-half" style="min-height: auto; padding: 1rem;">
                     <div class="small-label">Current Signal Quality</div>
@@ -245,33 +223,19 @@
                     <div class="text-gray-400" id="qualityLabel" style="font-size: 0.85rem;">Waiting to start...</div>
                 </div>
 
-                <div class="input-group mb-half"
-                    style="background-color: var(--color-gray-900); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--color-gray-700);">
-                    <div class="label-row" style="color: var(--color-gray-300);">🎯 For Maximum Accuracy:</div>
-                    <ul class="text-gray-400" style="font-size: 0.85rem; margin: 0; padding-left: 1.2rem;">
-                        <li>Clear sky view - avoid buildings/trees</li>
-                        <li>Hold phone completely still</li>
-                        <li>Wait for accuracy &lt; 5m before starting</li>
-                        <li>Average for 5-10 minutes</li>
-                    </ul>
-                </div>
-
                 <div id="gps_status" class="warning-text text-center mb-half">Ready to start</div>
                 <div id="gps_error" class="result-error text-center mb-half hidden"></div>
 
                 <div class="input-row-responsive mb-half">
-                    <div class="flex-1 text-center"
-                        style="background-color: var(--color-gray-900); padding: 0.8rem; border-radius: var(--radius-md); border: 1px solid var(--color-gray-700);">
+                    <div class="stat-box">
                         <div class="small-label">Samples</div>
                         <div class="font-bold text-gray-300" id="gps_samples">0</div>
                     </div>
-                    <div class="flex-1 text-center"
-                        style="background-color: var(--color-gray-900); padding: 0.8rem; border-radius: var(--radius-md); border: 1px solid var(--color-gray-700);">
+                    <div class="stat-box">
                         <div class="small-label">Elapsed</div>
                         <div class="font-bold text-gray-300" id="gps_elapsed">0s</div>
                     </div>
-                    <div class="flex-1 text-center"
-                        style="background-color: var(--color-gray-900); padding: 0.8rem; border-radius: var(--radius-md); border: 1px solid var(--color-gray-700);">
+                    <div class="stat-box">
                         <div class="small-label">Rejected</div>
                         <div class="font-bold text-gray-300" id="gps_rejected">0</div>
                     </div>
@@ -279,53 +243,50 @@
 
                 <div id="gps_results_container" class="input-group mb-half copy-target"
                     style="background-color: var(--color-gray-900); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--color-gray-700); cursor: pointer;">
-                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;"><span
-                            class="small-label w-auto flex-1">Latitude:</span><span
-                            class="font-bold text-gray-300 text-right flex-1" id="gps_lat">--</span></div>
-                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;"><span
-                            class="small-label w-auto flex-1">Longitude:</span><span
-                            class="font-bold text-gray-300 text-right flex-1" id="gps_lon">--</span></div>
-                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;"><span
-                            class="small-label w-auto flex-1">Altitude (MSL):</span><span
-                            class="font-bold text-gray-300 text-right flex-1" id="gps_alt">--</span></div>
-                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;"><span
-                            class="small-label w-auto flex-1">Geoid Sep (N):</span><span
-                            class="font-bold text-gray-300 text-right flex-1" id="gps_geoid_sep">--</span></div>
-                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;"><span
-                            class="small-label w-auto flex-1">Avg Accuracy:</span><span
-                            class="font-bold text-gray-300 text-right flex-1" id="gps_acc">--</span></div>
+                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;">
+                        <span class="small-label w-auto flex-1">Latitude:</span>
+                        <span class="font-bold text-gray-300 text-right flex-1" id="gps_lat">--</span>
+                    </div>
+                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;">
+                        <span class="small-label w-auto flex-1">Longitude:</span>
+                        <span class="font-bold text-gray-300 text-right flex-1" id="gps_lon">--</span>
+                    </div>
+                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;">
+                        <span class="small-label w-auto flex-1">Altitude (MSL):</span>
+                        <span class="font-bold text-gray-300 text-right flex-1" id="gps_alt">--</span>
+                    </div>
+                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;">
+                        <span class="small-label w-auto flex-1">Geoid Sep (N):</span>
+                        <span class="font-bold text-gray-300 text-right flex-1" id="gps_geoid_sep">--</span>
+                    </div>
+                    <div class="coord-row" style="min-height: auto; margin-bottom: 0.3rem;">
+                        <span class="small-label w-auto flex-1">Avg Accuracy:</span>
+                        <span class="font-bold text-gray-300 text-right flex-1" id="gps_acc">--</span>
+                    </div>
                 </div>
 
                 <div class="input-row-responsive mb-half">
-                    <div class="flex-1 text-center"
-                        style="background-color: var(--color-gray-900); padding: 0.8rem; border-radius: var(--radius-md); border: 1px solid var(--color-gray-700);">
+                    <div class="stat-box">
                         <div class="small-label">Std Deviation</div>
                         <div class="font-bold text-gray-300" id="gps_stddev">--</div>
                     </div>
-                    <div class="flex-1 text-center"
-                        style="background-color: var(--color-gray-900); padding: 0.8rem; border-radius: var(--radius-md); border: 1px solid var(--color-gray-700);">
+                    <div class="stat-box">
                         <div class="small-label">CEP 95%</div>
                         <div class="font-bold text-gray-300" id="gps_cep">--</div>
                     </div>
                 </div>
 
                 <div class="flex space-x-2 mt-6">
-                    <button id="startGpsBtn" class="calculate-btn"
-                        style="background-color: var(--color-green-500); margin-top: 0; margin-bottom: 0;">Start</button>
-                    <button id="stopGpsBtn" class="calculate-btn"
-                        style="background-color: var(--color-red-500); margin-top: 0; margin-bottom: 0;"
-                        disabled>Stop</button>
-                    <button id="resetGpsBtn" class="calculate-btn"
-                        style="background-color: var(--color-gray-600); margin-top: 0; margin-bottom: 0;"
-                        disabled>Reset</button>
+                    <button id="startGpsBtn" class="calculate-btn" style="background-color: var(--color-green-500); margin-top: 0; margin-bottom: 0;">Start</button>
+                    <button id="stopGpsBtn"  class="calculate-btn" style="background-color: var(--color-red-500);   margin-top: 0; margin-bottom: 0;" disabled>Stop</button>
+                    <button id="resetGpsBtn" class="calculate-btn" style="background-color: var(--color-gray-600);  margin-top: 0; margin-bottom: 0;" disabled>Reset</button>
                 </div>
             </section>
 
             <div class="ducky-mascot" title="Ducky: Ducky is here to help!" aria-hidden="true">🦆</div>
+
         </div>
     </main>
-
-    <!-- Application Logic -->
 </body>
 
 </html>

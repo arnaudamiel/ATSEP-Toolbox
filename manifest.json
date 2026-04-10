@@ -54,6 +54,12 @@
             "short_name": "Dest",
             "description": "Project destination from point, distance, and bearing",
             "url": "./index.html#dest-panel"
+        },
+        {
+            "name": "Precision GPS Averager",
+            "short_name": "GPS",
+            "description": "Precision GPS averager with geoid data",
+            "url": "./index.html#gps-panel"
         }
     ]
 }

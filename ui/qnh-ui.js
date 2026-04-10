@@ -22,10 +22,10 @@ function handlePressureUnitChange(e) {
         let val = parseFloat(input.value);
         if (!isNaN(val)) {
             if (newUnit === 'inHg' && oldUnit === 'hPa') {
-                val = val * QNH.HPA_TO_INHG;
+                val = val * ATSEP_CONSTANTS.HPA_TO_INHG;
                 input.value = val.toFixed(2);
             } else if (newUnit === 'hPa' && oldUnit === 'inHg') {
-                val = val * QNH.INHG_TO_HPA;
+                val = val * ATSEP_CONSTANTS.INHG_TO_HPA;
                 input.value = Math.round(val);
             }
         }

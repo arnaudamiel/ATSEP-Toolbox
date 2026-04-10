@@ -1,17 +1,13 @@
 /**
  * ATSEP Toolbox Styles
- * 
  * Design system for the ATSEP aviation toolbox application.
- * Uses CSS custom properties for consistent theming.
  */
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 /* === Design Tokens === */
 :root {
-    /* Gray scale - dark theme */
+    /* Gray scale */
     --color-gray-900: #1a202c;
     --color-gray-800: #2d3748;
     --color-gray-700: #4a5568;
@@ -45,7 +41,7 @@
     --transition-medium: 0.3s ease;
 }
 
-/* === Base Styles === */
+/* === Base === */
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--color-gray-900);
@@ -59,8 +55,6 @@ body {
 }
 
 /* === Accessibility === */
-
-/* Visually hidden but accessible to screen readers */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -73,7 +67,6 @@ body {
     border: 0;
 }
 
-/* Show on focus for keyboard navigation */
 .visually-hidden.focus-visible:focus {
     position: static;
     width: auto;
@@ -90,10 +83,7 @@ body {
     z-index: 1000;
 }
 
-/* Hidden utility class */
-.hidden {
-    display: none !important;
-}
+.hidden { display: none !important; }
 
 /* === Main Card === */
 .calculator-card {
@@ -134,19 +124,9 @@ body {
     transition: all var(--transition-fast);
 }
 
-.tab-btn:hover {
-    color: var(--color-gray-300);
-}
-
-.tab-btn:focus {
-    outline: 2px solid var(--color-blue-500);
-    outline-offset: 2px;
-}
-
-.tab-btn.active {
-    background-color: var(--color-gray-700);
-    color: white;
-}
+.tab-btn:hover { color: var(--color-gray-300); }
+.tab-btn:focus { outline: 2px solid var(--color-blue-500); outline-offset: 2px; }
+.tab-btn.active { background-color: var(--color-gray-700); color: white; }
 
 .tab-panel {
     display: none;
@@ -166,18 +146,15 @@ body {
     text-align: left;
 }
 
-.mb-half {
-    margin-bottom: var(--spacing-sm);
-}
+.mb-half { margin-bottom: var(--spacing-sm); }
 
-/* Fixed height for coordinate input containers to prevent card resizing */
+/* Fixed height prevents card resizing when coordinate format changes */
 #r_origin_inputs,
 #r_dest_inputs,
 #d_start_inputs,
 #mag_coord_inputs {
     min-height: 7.5rem;
 }
-
 
 .label-row {
     display: flex;
@@ -205,10 +182,7 @@ body {
     font-size: 0.9rem;
 }
 
-.clean-select:focus {
-    outline: 2px solid var(--color-blue-500);
-    outline-offset: 2px;
-}
+.clean-select:focus { outline: 2px solid var(--color-blue-500); outline-offset: 2px; }
 
 .coord-row {
     display: flex;
@@ -232,10 +206,7 @@ body {
     text-align: center;
 }
 
-.hem-select:focus {
-    outline: 2px solid var(--color-blue-500);
-    outline-offset: 2px;
-}
+.hem-select:focus { outline: 2px solid var(--color-blue-500); outline-offset: 2px; }
 
 .num-input,
 .input-field {
@@ -279,16 +250,10 @@ body {
     transition: background-color var(--transition-fast);
 }
 
-.calculate-btn:hover {
-    background-color: var(--color-blue-600);
-}
+.calculate-btn:hover { background-color: var(--color-blue-600); }
+.calculate-btn:focus { outline: 2px solid var(--color-blue-500); outline-offset: 2px; }
 
-.calculate-btn:focus {
-    outline: 2px solid var(--color-blue-500);
-    outline-offset: 2px;
-}
-
-/* === Copy to Clipboard Feedback === */
+/* === Copy to Clipboard === */
 .copy-target {
     transition: background-color var(--transition-fast);
     -webkit-user-select: none;
@@ -322,15 +287,8 @@ body {
     border-radius: var(--radius-sm);
 }
 
-.swap-icon-btn:hover {
-    color: var(--color-blue-500);
-    background-color: var(--color-gray-700);
-}
-
-.swap-icon-btn:focus {
-    outline: 2px solid var(--color-blue-500);
-    outline-offset: 2px;
-}
+.swap-icon-btn:hover { color: var(--color-blue-500); background-color: var(--color-gray-700); }
+.swap-icon-btn:focus { outline: 2px solid var(--color-blue-500); outline-offset: 2px; }
 
 /* === Results === */
 .result-container {
@@ -364,46 +322,40 @@ body {
     margin: 0 auto;
 }
 
-.result-row .label {
-    opacity: 0.7;
-    font-weight: normal;
-}
+.result-row .label { opacity: 0.7; font-weight: normal; }
+.result-row .val { color: var(--color-green-500); font-weight: bold; }
 
-.result-row .val {
-    color: var(--color-green-500);
-    font-weight: bold;
-}
-
+/* Merged: result-positive and result-success are identical */
 .result-positive,
-.result-success {
-    color: var(--color-green-500);
-}
+.result-success { color: var(--color-green-500); }
 
-.result-negative {
-    color: var(--color-red-400);
-}
+.result-negative { color: var(--color-red-400); }
 
 .result-error {
     color: var(--color-red-500);
     font-weight: bold;
 }
 
-.warning-text {
-    color: var(--color-red-400);
-    font-size: 0.9rem;
-    margin-bottom: var(--spacing-sm);
-    display: block;
-}
+.warning-text { color: var(--color-red-400); }
 
-.result-box[data-warning="true"] {
-    border: 2px solid var(--color-blue-500);
-    background-color: rgba(99, 179, 237, 0.08);
-}
-
-.coord-val {
-    display: inline-block;
+/* === App Title === */
+.app-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-md);
+    color: white;
     white-space: nowrap;
     margin: 0 var(--spacing-sm);
+}
+
+/* === GPS Stat Box (replaces repeated inline styles) === */
+.stat-box {
+    flex: 1;
+    text-align: center;
+    background-color: var(--color-gray-900);
+    padding: 0.8rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-gray-700);
 }
 
 /* === Decorations === */
@@ -423,301 +375,59 @@ body {
     cursor: help;
 }
 
-/* === Animations === */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
+/* === Utility Classes (used by JS-generated markup) === */
+.text-3xl { font-size: 1.875rem; }
+.font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }
+.text-sm { font-size: 0.875rem; }
+.text-gray-400 { color: var(--color-gray-400); }
+.text-gray-300 { color: var(--color-gray-300); }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.block { display: block; }
+.flex { display: flex; }
+.flex-1 { flex: 1; }
+.flex-grow { flex-grow: 1; }
+.items-center { align-items: center; }
+.w-auto { width: auto; }
+.w-full { width: 100%; }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mt-6 { margin-top: var(--spacing-lg); }
+.text-left { text-align: left; }
+.space-x-2 > :not([hidden]) ~ :not([hidden]) { margin-left: var(--spacing-sm); }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* === Utility Classes === */
-.text-3xl {
-    font-size: 1.875rem;
-}
-
-.font-bold {
-    font-weight: 700;
-}
-
-.font-medium {
-    font-weight: 500;
-}
-
-.mb-2 {
-    margin-bottom: var(--spacing-sm);
-}
-
-.text-sm {
-    font-size: 0.875rem;
-}
-
-.text-gray-400 {
-    color: var(--color-gray-400);
-}
-
-.block {
-    display: block;
-}
-
-.flex {
-    display: flex;
-}
-
-.flex-1 {
-    flex: 1;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.space-x-2> :not([hidden])~ :not([hidden]) {
-    margin-left: var(--spacing-sm);
-}
-
-.flex-grow {
-    flex-grow: 1;
-}
-
-.w-auto {
-    width: auto;
-}
-
-.w-full {
-    width: 100%;
-}
-
-.mt-6 {
-    margin-top: var(--spacing-lg);
-}
-
-.text-left {
-    text-align: left;
-}
-
-/* === Responsive Helpers === */
+/* === Responsive Layout === */
 .input-row-responsive {
     display: flex;
     gap: 0.8rem;
     flex-wrap: wrap;
 }
 
-.input-row-responsive>div {
-    min-width: 140px;
+.input-row-responsive > div { min-width: 140px; }
+
+/* === Animations === */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-/* === Reduced Motion === */
-@media (prefers-reduced-motion: reduce) {
-    .tab-panel.active {
-        animation: none;
-    }
-
-    .tab-btn,
-    .num-input,
-    .input-field,
-    .calculate-btn,
-    .swap-icon-btn,
-    .hem-select,
-    .clean-select,
-    .ducky-mascot {
-        transition: none;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 1;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
+@keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
 }
 
-/* === High Contrast Mode === */
-@media (prefers-contrast: high) {
-    .result-box {
-        border-width: 2px;
-    }
-
-    .num-input:focus,
-    .input-field:focus {
-        border-width: 2px;
-    }
-
-    .tab-btn:focus,
-    .calculate-btn:focus,
-    .swap-icon-btn:focus {
-        outline-width: 3px;
-    }
-}
-
-/* === Print Styles === */
-@media print {
-    body {
-        background-color: white;
-        color: black;
-        padding: 0;
-    }
-
-    .calculator-card {
-        box-shadow: none;
-        border: 1px solid #333;
-        max-width: 100%;
-        min-height: auto;
-        padding: 1rem;
-    }
-
-    .tab-nav,
-    .calculate-btn,
-    .swap-icon-btn,
-    .ducky-mascot,
-    .visually-hidden {
-        display: none !important;
-    }
-
-    .tab-panel {
-        display: block !important;
-        page-break-inside: avoid;
-        margin-bottom: 1rem;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 1rem;
-    }
-
-    .result-box {
-        border: 1px solid #333;
-        background-color: #f5f5f5;
-        color: black;
-    }
-
-    .result-positive,
-    .result-success {
-        color: #006600;
-    }
-
-    .result-negative,
-    .result-error,
-    .warning-text {
-        color: #cc0000;
-    }
-
-    .app-title {
-        color: black;
-        border-bottom: 2px solid #333;
-        padding-bottom: 0.5rem;
-    }
-
-    .input-group,
-    .coord-row {
-        display: none;
-    }
-}
-
-/* === Mobile Responsiveness === */
-@media (max-width: 500px) {
-    body {
-        padding: 1rem;
-        /* Guarantee card edges are visible */
-    }
-
-    .calculator-card {
-        padding: 2.2rem;
-        /* Exact match to Tab 1 / Default desktop style */
-        min-height: auto;
-        border-radius: var(--radius-xl);
-        width: 100%;
-        max-width: 100%;
-        /* Prevent width changes when switching tabs or coordinate formats */
-        box-sizing: border-box;
-    }
-
-    .app-title {
-        font-size: 1.4rem;
-        margin-bottom: var(--spacing-md);
-        line-height: 1.2;
-        overflow-wrap: break-word;
-        /* Ensure titles wrap */
-    }
-
-    .label-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .tab-nav {
-        margin-bottom: var(--spacing-lg);
-        padding: 4px;
-    }
-
-    .tab-btn {
-        padding: var(--spacing-md) var(--spacing-xs);
-        font-size: 0.75rem;
-    }
-
-    .coord-row {
-        gap: 6px;
-        flex-wrap: wrap;
-        /* CRITICAL: Wrap items if they don't fit */
-        width: 100%;
-        /* Prevent parent card from resizing */
-    }
-
-    /* Ensure coordinate input containers don't cause card width changes */
-    #r_origin_inputs,
-    #r_dest_inputs,
-    #d_start_inputs,
-    #mag_coord_inputs {
-        width: 100%;
-        overflow-x: hidden;
-    }
-
-    .num-input,
-    .input-field {
-        padding: 0.6rem 0.4rem;
-        /* Compact inputs to help them stay on one line if possible */
-        font-size: 0.9rem;
-        min-width: 60px;
-        /* Prevent shrinking too much */
-    }
-
-    .hem-select {
-        width: 55px;
-        font-size: 0.85rem;
-        padding: 0.5rem 0;
-    }
-
-    .calculate-btn {
-        padding: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .result-box {
-        padding: var(--spacing-md);
-        font-size: 1rem;
-    }
-
-    .swap-icon-btn {
-        font-size: 1.5rem;
-        padding: 0.1rem 0.5rem;
-    }
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.7; transform: scale(1.1); }
 }
 
 /* === Update Banner === */
 .update-banner {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     z-index: 9999;
     padding: var(--spacing-sm) var(--spacing-md);
-    background: rgba(45, 55, 72, 0.85); /* Slate with transparency */
+    background: rgba(45, 55, 72, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 2px solid var(--color-blue-500);
@@ -763,34 +473,174 @@ body {
     box-shadow: 0 4px 12px rgba(99, 179, 237, 0.3);
 }
 
-.update-banner-btn:active {
-    transform: translateY(0);
+.update-banner-btn:active { transform: translateY(0); }
+
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+    .tab-panel.active { animation: none; }
+
+    .tab-btn, .num-input, .input-field, .calculate-btn,
+    .swap-icon-btn, .hem-select, .clean-select, .ducky-mascot {
+        transition: none;
+    }
+
+    @keyframes fadeIn {
+        from, to { opacity: 1; }
+    }
 }
 
-@keyframes slideDown {
-    from { transform: translateY(-100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+/* === High Contrast === */
+@media (prefers-contrast: high) {
+    .result-box,
+    .num-input:focus,
+    .input-field:focus { border-width: 2px; }
+
+    .tab-btn:focus,
+    .calculate-btn:focus,
+    .swap-icon-btn:focus { outline-width: 3px; }
 }
 
-@keyframes pulse {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.1); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
+/* === Mobile (≤500px) === */
 @media (max-width: 500px) {
+    body { padding: 1rem; }
+
+    .calculator-card {
+        padding: 2.2rem;
+        min-height: auto;
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .app-title {
+        font-size: 1.4rem;
+        margin-bottom: var(--spacing-md);
+        line-height: 1.2;
+        overflow-wrap: break-word;
+    }
+
+    .label-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .tab-nav {
+        margin-bottom: var(--spacing-lg);
+        padding: 4px;
+    }
+
+    .tab-btn {
+        padding: var(--spacing-md) var(--spacing-xs);
+        font-size: 0.75rem;
+    }
+
+    .coord-row {
+        gap: 6px;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    #r_origin_inputs,
+    #r_dest_inputs,
+    #d_start_inputs,
+    #mag_coord_inputs {
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .num-input,
+    .input-field {
+        padding: 0.6rem 0.4rem;
+        font-size: 0.9rem;
+        min-width: 60px;
+    }
+
+    .hem-select {
+        width: 55px;
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+
+    .calculate-btn {
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .result-box {
+        padding: var(--spacing-md);
+        font-size: 1rem;
+    }
+
+    .swap-icon-btn {
+        font-size: 1.5rem;
+        padding: 0.1rem 0.5rem;
+    }
+
+    /* Update banner */
     .update-banner-content {
         flex-direction: column;
         gap: var(--spacing-sm);
         text-align: center;
     }
-    
-    .update-banner-text {
-        font-size: 0.85rem;
-    }
-    
+
+    .update-banner-text { font-size: 0.85rem; }
+
     .update-banner-btn {
         width: 100%;
         padding: 0.6rem;
     }
+}
+
+/* === Print === */
+@media print {
+    body {
+        background-color: white;
+        color: black;
+        padding: 0;
+    }
+
+    .calculator-card {
+        box-shadow: none;
+        border: 1px solid #333;
+        max-width: 100%;
+        min-height: auto;
+        padding: 1rem;
+    }
+
+    .tab-nav,
+    .calculate-btn,
+    .swap-icon-btn,
+    .ducky-mascot,
+    .visually-hidden { display: none !important; }
+
+    .tab-panel {
+        display: block !important;
+        page-break-inside: avoid;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 1rem;
+    }
+
+    .result-box {
+        border: 1px solid #333;
+        background-color: #f5f5f5;
+        color: black;
+    }
+
+    .result-positive,
+    .result-success { color: #006600; }
+
+    .result-negative,
+    .result-error,
+    .warning-text { color: #cc0000; }
+
+    .app-title {
+        color: black;
+        border-bottom: 2px solid #333;
+        padding-bottom: 0.5rem;
+    }
+
+    .input-group,
+    .coord-row { display: none; }
 }

@@ -9,7 +9,7 @@
  * - Manual of the ICAO Standard Atmosphere (Doc 7488/3)
  * 
  * @module QNH
- * @author ATSEP Toolbox
+ * @author Arnaud Amiel
  */
 
 import { ATSEP_CONSTANTS, ERROR_MESSAGES } from './constants.js';
@@ -139,9 +139,6 @@ export const QNH = (function () {
 
     // Public API
     return {
-        calculate,
-        // Expose constants for use by other modules
-        INHG_TO_HPA: INHG_TO_HPA,
-        STANDARD_PRESSURE_HPA: STANDARD_PRESSURE_HPA
+        calculate
     };
 })();

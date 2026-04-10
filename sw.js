@@ -4,10 +4,10 @@
  * Implements a cache-first strategy with background updates.
  * All assets are cached for offline use.
  * 
- * @version 1.5.0
+ * @version 1.5.1
  */
 
-const CACHE_NAME = 'atsep-calc-v1.5.0';
+const CACHE_NAME = 'atsep-calc-v1.5.1';
 
 /**
  * List of assets to cache for offline use.
